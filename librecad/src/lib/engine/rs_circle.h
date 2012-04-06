@@ -162,7 +162,7 @@ with Cx the center of the common tangent circle, Rx the radius. Ci and Ri are th
     static QList<RS_Circle> solveAppolloniusSingle(const QList<RS_Circle>& circles);
 
     QList<RS_Circle> createTan3(const QVector<RS_AtomicEntity*>& circles);
-
+bool testTan3(const QVector<RS_AtomicEntity*>& circles);
     virtual RS_Vector getMiddlePoint(void)const;
     virtual RS_Vector getNearestEndpoint(const RS_Vector& coord,
                                          double* dist = NULL)const;

@@ -284,7 +284,7 @@ RS_VectorSolutions RS_Circle::createTan2(const QVector<RS_AtomicEntity*>& circle
 QList<RS_Circle> RS_Circle::createTan3(const QVector<RS_AtomicEntity*>& circles)
 {
     QList<RS_Circle> ret;
-    if(circles.size()<3) return ret;
+    if(circles.size()!=3) return ret;
      QList<RS_Circle> cs;
      for(unsigned short i=0;i<3;i++){
          cs<<RS_Circle(NULL,RS_CircleData(circles.at(i)->getCenter(),circles.at(i)->getRadius()));
@@ -304,7 +304,27 @@ QList<RS_Circle> RS_Circle::createTan3(const QVector<RS_AtomicEntity*>& circles)
         }
 
     }while(flags<8u);
+    for(int i=0;i<ret.size();i++){
+        if(ret[i].testTan3(circles) == false) {
+            ret.erase(ret.begin()+i);
+        }else{
+            i++;
+        }
+    }
     return ret;
+}
+
+bool RS_Circle::testTan3(const QVector<RS_AtomicEntity*>& circles)
+{
+
+    if(circles.size()!=3) return false;
+
+    const auto itEnd=circles.end();
+    for(auto it=circles.begin();it!=itEnd;it++){
+       const double dist=(data.center - (*it)->getCenter()).magnitude();
+       if(  fabs(dist -  fabs( data.radius - (*it)->getRadius()))>RS_TOLERANCE && fabs(dist - data.radius - (*it)->getRadius())>RS_TOLERANCE ) return false;
+    }
+    return true;
 }
 
 /** solve one of the eight Appollonius Equations
@@ -356,7 +376,7 @@ QList<RS_Circle> RS_Circle::solveAppolloniusSingle(const QList<RS_Circle>& circl
     std::vector<double>&& vr=RS_Math::quadraticSolver(ce);
     for(size_t i=0; i < vr.size();i++){
 //        if(vr.at(i)<RS_TOLERANCE) continue;
-        ret<<RS_Circle(NULL,RS_CircleData(vp+vq*vr.at(i),vr.at(i)));
+        ret<<RS_Circle(NULL,RS_CircleData(vp+vq*vr.at(i),fabs(vr.at(i))));
     }
     return ret;
 }
