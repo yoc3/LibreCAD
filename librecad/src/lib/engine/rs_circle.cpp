@@ -332,7 +332,7 @@ QList<RS_Circle> RS_Circle::solveAppolloniusSingle(const QList<RS_Circle>& circl
     // r^0 term
     mat[0][2]=0.5*(centers[2].squared()-centers[0].squared()+radii[0]*radii[0]-radii[2]*radii[2]);
     mat[1][2]=0.5*(centers[2].squared()-centers[1].squared()+radii[1]*radii[1]-radii[2]*radii[2]);
-    QVector<QVector<double> > sm(0,QVector<double>(2,0.));
+    QVector<QVector<double> > sm(2,QVector<double>(2,0.));
     if(RS_Math::linearSolver(mat,sm[0])==false){
         return ret;
     }
