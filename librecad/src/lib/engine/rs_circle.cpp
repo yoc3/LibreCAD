@@ -281,6 +281,87 @@ RS_VectorSolutions RS_Circle::createTan2(const QVector<RS_AtomicEntity*>& circle
 
 }
 
+QList<RS_Circle> RS_Circle::createTan3(const QVector<RS_AtomicEntity*>& circles)
+{
+    QList<RS_Circle> ret;
+    if(circles.size()<3) return ret;
+     QList<RS_Circle> cs;
+     for(unsigned short i=0;i<3;i++){
+         cs<<RS_Circle(NULL,RS_CircleData(circles.at(i)->getCenter(),circles.at(i)->getRadius()));
+     }
+    unsigned short flags=0;
+    do{
+        ret.append(solveAppolloniusSingle(cs));
+        flags++;
+        size_t j=0;
+        for(unsigned short i=1u;i<=4u;i<<=1){
+            if(flags & i) {
+                cs[j].setRadius( - fabs(cs[j].getRadius()));
+            }else{
+                cs[j].setRadius( fabs(cs[j].getRadius()));
+            }
+            j++;
+        }
+
+    }while(flags<8u);
+    return ret;
+}
+
+/** solve one of the eight Appollonius Equations
+| Cx - Ci|^2=(Rx+Ri)^2
+with Cx the center of the common tangent circle, Rx the radius. Ci and Ri are the Center and radius of the i-th existing circle
+**/
+QList<RS_Circle> RS_Circle::solveAppolloniusSingle(const QList<RS_Circle>& circles)
+{
+    QList<RS_Circle> ret;
+
+    QList<RS_Vector> centers;
+    QList<double> radii;
+
+    for(size_t i=0;i<3;i++){
+        if(circles[i].getCenter().valid==false) return ret;
+        centers.push_back(circles[i].getCenter());
+        radii.push_back(circles[i].getRadius());
+    }
+/** form the linear equation to solve center in radius **/
+    QVector<QVector<double> > mat(2,QVector<double>(3,0.));
+    mat[0][0]=centers[2].x - centers[0].x;
+    mat[0][1]=centers[2].y - centers[0].y;
+    mat[1][0]=centers[2].x - centers[1].x;
+    mat[1][1]=centers[2].y - centers[1].y;
+    // r^0 term
+    mat[0][2]=0.5*(centers[2].squared()-centers[0].squared()+radii[0]*radii[0]-radii[2]*radii[2]);
+    mat[1][2]=0.5*(centers[2].squared()-centers[1].squared()+radii[1]*radii[1]-radii[2]*radii[2]);
+    QVector<QVector<double> > sm(0,QVector<double>(2,0.));
+    if(RS_Math::linearSolver(mat,sm[0])==false){
+        return ret;
+    }
+    // r term
+    mat[0][2]= radii[0]-radii[2];
+    mat[1][2]= radii[1]-radii[2];
+    if(RS_Math::linearSolver(mat,sm[1])==false){
+        return ret;
+    }
+    //form quadratic equation for r
+    RS_Vector vp(sm[0][0],sm[0][1]);
+    RS_Vector vq(sm[1][0],sm[1][1]);
+    RS_Vector cp=centers[0]-vp;
+    double a=vq.squared()-1.;
+    if(fabs(a)<RS_TOLERANCE*1e-4) {
+        return ret;
+    }
+    std::vector<double> ce(0,0.);
+    ce.push_back(2.*(radii[0]+cp.dotP(vq))/a);
+    ce.push_back((cp.squared()-radii[0]*radii[0])/a);
+    std::vector<double>&& vr=RS_Math::quadraticSolver(ce);
+    if(vr.size()==0) return ret;
+    for(size_t i=0; i < vr.size();i++){
+        if(vr.at(i)<RS_TOLERANCE) continue;
+        ret<<RS_Circle(NULL,RS_CircleData(vp+vq*vr.at(i),vr.at(i)));
+    }
+    return ret;
+}
+
 RS_VectorSolutions RS_Circle::getRefPoints() {
     RS_Vector v1(data.radius, 0.0);
     RS_Vector v2(0.0, data.radius);
