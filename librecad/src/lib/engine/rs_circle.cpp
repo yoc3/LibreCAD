@@ -354,9 +354,8 @@ QList<RS_Circle> RS_Circle::solveAppolloniusSingle(const QList<RS_Circle>& circl
     ce.push_back(2.*(radii[0]+cp.dotP(vq))/a);
     ce.push_back((cp.squared()-radii[0]*radii[0])/a);
     std::vector<double>&& vr=RS_Math::quadraticSolver(ce);
-    if(vr.size()==0) return ret;
     for(size_t i=0; i < vr.size();i++){
-        if(vr.at(i)<RS_TOLERANCE) continue;
+//        if(vr.at(i)<RS_TOLERANCE) continue;
         ret<<RS_Circle(NULL,RS_CircleData(vp+vq*vr.at(i),vr.at(i)));
     }
     return ret;
