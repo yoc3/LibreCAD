@@ -345,7 +345,7 @@ QList<RS_Circle> RS_Circle::solveAppolloniusSingle(const QList<RS_Circle>& circl
     //form quadratic equation for r
     RS_Vector vp(sm[0][0],sm[0][1]);
     RS_Vector vq(sm[1][0],sm[1][1]);
-    RS_Vector cp=centers[0]-vp;
+    RS_Vector cp=vp-centers[0];
     double a=vq.squared()-1.;
     if(fabs(a)<RS_TOLERANCE*1e-4) {
         return ret;
