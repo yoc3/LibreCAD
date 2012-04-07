@@ -154,7 +154,7 @@ bool RS_ActionDrawCircleTan3::getData(){
 }
 
 bool RS_ActionDrawCircleTan3::preparePreview(){
-    if(getStatus() != SetCenter) {
+    if(getStatus() != SetCenter || valid==false) {
         valid=false;
         return false;
     }
@@ -214,7 +214,6 @@ void RS_ActionDrawCircleTan3::mouseReleaseEvent(QMouseEvent* e) {
             RS_Entity*  en = catchCircle(e);
             if (en==NULL) return;
             circles.resize(getStatus());
-            auto id=en->getId();
             for(int i=0;i<circles.size();i++){
                 if(
                         (circles.at(i)->getCenter() - en->getCenter()).squared() < RS_TOLERANCE*RS_TOLERANCE
@@ -222,7 +221,7 @@ void RS_ActionDrawCircleTan3::mouseReleaseEvent(QMouseEvent* e) {
                         ) return;
             }
             circles.push_back(static_cast<RS_AtomicEntity*>(en));
-            if(getStatus()<=SetCircle2 || getData()){
+            if(getStatus()<=SetCircle2 || (getStatus()==SetCircle3 && getData())){
                     circles.at(circles.size()-1)->setHighlighted(true);
                     graphicView->redraw(RS2::RedrawDrawing);
                     setStatus(getStatus()+1);

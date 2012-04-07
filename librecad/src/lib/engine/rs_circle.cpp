@@ -304,13 +304,16 @@ QList<RS_Circle> RS_Circle::createTan3(const QVector<RS_AtomicEntity*>& circles)
         }
 
     }while(flags<8u);
-    for(int i=0;i<ret.size();i++){
+//    std::cout<<__FILE__<<" : "<<__FUNCTION__<<" : line "<<__LINE__<<std::endl;
+//    std::cout<<"before testing, ret.size()="<<ret.size()<<std::endl;
+    for(int i=0;i<ret.size();){
         if(ret[i].testTan3(circles) == false) {
             ret.erase(ret.begin()+i);
         }else{
             i++;
         }
     }
+//    std::cout<<"after testing, ret.size()="<<ret.size()<<std::endl;
     return ret;
 }
 
@@ -320,9 +323,13 @@ bool RS_Circle::testTan3(const QVector<RS_AtomicEntity*>& circles)
     if(circles.size()!=3) return false;
 
     const auto itEnd=circles.end();
+//    std::cout<<__FILE__<<" : "<<__FUNCTION__<<" : line "<<__LINE__<<std::endl;
+//    std::cout<<"to verify Center = ( "<<data.center.x<<" , "<<data.center.y<<" ), r= "<<data.radius<<std::endl;
     for(auto it=circles.begin();it!=itEnd;it++){
-       const double dist=(data.center - (*it)->getCenter()).magnitude();
-       if(  fabs(dist -  fabs( data.radius - (*it)->getRadius()))>RS_TOLERANCE && fabs(dist - data.radius - (*it)->getRadius())>RS_TOLERANCE ) return false;
+//        std::cout<<"with Center = ( "<<(*it)->getCenter().x<<" , "<<(*it)->getCenter().y<<" ), r= "<<(*it)->getRadius()<<std::endl;
+        const double dist=(data.center - (*it)->getCenter()).magnitude();
+        if(  fabs(dist -  fabs( data.radius - (*it)->getRadius()))>RS_TOLERANCE && fabs(dist - data.radius - (*it)->getRadius())>RS_TOLERANCE ) return false;
+//        std::cout<<"accepted"<<std::endl;
     }
     return true;
 }
