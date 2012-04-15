@@ -192,6 +192,7 @@ HEADERS += \
     lib/modification/rs_modification.h \
     lib/modification/rs_selection.h \
     lib/math/rs_math.h \
+    lib/math/lc_quadratic.h \
     lib/scripting/rs_python.h \
     lib/scripting/rs_simplepython.h \
     lib/scripting/rs_python_wrappers.h \
@@ -268,6 +269,7 @@ SOURCES += \
     lib/information/rs_information.cpp \
     lib/information/rs_infoarea.cpp \
     lib/math/rs_math.cpp \
+    lib/math/lc_quadratic.cpp \
     lib/modification/rs_modification.cpp \
     lib/modification/rs_selection.cpp \
     lib/scripting/rs_python.cpp \
