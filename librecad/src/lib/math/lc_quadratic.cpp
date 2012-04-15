@@ -57,3 +57,17 @@
      }
 
  }
+
+ std::vector<double>  LC_Quadratic::getCoeffficents() const
+ {
+     std::vector<double> ret(0,0.);
+     if(m_bIsQuadratic){
+         ret.push_back(m_mQuad(0,0));
+         ret.push_back(m_mQuad(0,1)+m_mQuad(1,0));
+         ret.push_back(m_mQuad(1,1));
+     }
+         ret.push_back(m_vLinear(0));
+         ret.push_back(m_vLinear(1));
+         ret.push_back(m_dConst);
+ }
+

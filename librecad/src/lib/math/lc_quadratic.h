@@ -41,6 +41,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 class LC_Quadratic {
 public:
     LC_Quadratic(std::vector<double> ce);
+    std::vector<double> getCoeffficents() const;
 
     private:
     boost::numeric::ublas::matrix<double> m_mQuad;
