@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define LC_QUADRATIC_H
 
 
+#include "rs_vector.h"
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
@@ -42,6 +43,8 @@ class LC_Quadratic {
 public:
     LC_Quadratic(std::vector<double> ce);
     std::vector<double> getCoeffficents() const;
+    LC_Quadratic move(const RS_Vector& v);
+    LC_Quadratic rotate(const double& a);
 
     private:
     boost::numeric::ublas::matrix<double> m_mQuad;

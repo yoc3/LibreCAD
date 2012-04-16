@@ -71,3 +71,11 @@
          ret.push_back(m_dConst);
  }
 
+ LC_Quadratic LC_Quadratic::move(const RS_Vector& v)
+ {
+     m_vLinear(0) += 2.*m_mQuad(0,0)*v.x + (m_mQuad(0,1)+m_mQuad(1,0))*v.y;
+     m_vLinear(1) += 2.*m_mQuad(1,1)*v.y + (m_mQuad(0,1)+m_mQuad(1,0))*v.x;
+     m_dConst += m_mQuad(0,0)*v.x*v.x + (m_mQuad(0,1)+m_mQuad(1,0))*v.x*v.y+ m_mQuad(1,1)*v.y*v.y ;
+     return *this;
+ }
+
