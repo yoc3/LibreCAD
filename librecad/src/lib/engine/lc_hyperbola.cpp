@@ -25,7 +25,7 @@
 **********************************************************************/
 
 #include <QVector>
-#include "rs_hyperbola.h"
+#include "lc_hyperbola.h"
 
 #include "rs_graphic.h"
 #include "rs_graphicview.h"
@@ -40,9 +40,9 @@
 /**
  * Constructor.
  */
-RS_Hyperbola::RS_Hyperbola(RS_EntityContainer* parent,
-                       const RS_HyperbolaData& d)
-    :RS_AtomicEntity(parent), data(d) {
+LC_Hyperbola::LC_Hyperbola(LC_EntityContainer* parent,
+                       const LC_HyperbolaData& d)
+    :LC_AtomicEntity(parent), data(d) {
 
     //calculateEndpoints();
     calculateBorders();
@@ -53,7 +53,7 @@ RS_Hyperbola::RS_Hyperbola(RS_EntityContainer* parent,
  * Recalculates the endpoints using the angles and the radius.
  */
 /*
-void RS_Hyperbola::calculateEndpoints() {
+void LC_Hyperbola::calculateEndpoints() {
    double angle = data.majorP.angle();
    double radius1 = getMajorRadius();
    double radius2 = getMinorRadius();
@@ -80,19 +80,19 @@ void RS_Hyperbola::calculateEndpoints() {
   *@Author: Dongxu Li
   */
 
-RS_VectorSolutions RS_Hyperbola::getFoci() const {
+RS_VectorSolutions LC_Hyperbola::getFoci() const {
     RS_Vector vp(getMajorP()*sqrt(1.-getRatio()*getRatio()));
     return RS_VectorSolutions(getCenter()+vp, getCenter()-vp);
 }
 
-RS_VectorSolutions RS_Hyperbola::getRefPoints() {
+RS_VectorSolutions LC_Hyperbola::getRefPoints() {
     RS_VectorSolutions ret;
     ret.push_back(data.center);
     ret.appendTo(getFoci());
     return ret;
 }
 
-bool RS_Hyperbola::isPointOnEntity(const RS_Vector& coord,
+bool LC_Hyperbola::isPointOnEntity(const RS_Vector& coord,
                              double tolerance) const
 {
     double a=data.majorP.magnitude();
@@ -104,15 +104,19 @@ bool RS_Hyperbola::isPointOnEntity(const RS_Vector& coord,
 }
 
 
-std::vector<double> RS_Hyperbola::getEquation() const
+std::vector<double> LC_Hyperbola::getEquation() const
 {
 }
 
+RS_Vector LC_Hyperbola::getNearestEndpoint(const RS_Vector& /*coord*/,
+                                         double* /*dist*/ = NULL) const
+{
+}
 
 /**
  * Dumps the point's data to stdout.
  */
-std::ostream& operator << (std::ostream& os, const RS_Hyperbola& a) {
+std::ostream& operator << (std::ostream& os, const LC_Hyperbola& a) {
     os << " Hyperbola: " << a.data << "\n";
     return os;
 }

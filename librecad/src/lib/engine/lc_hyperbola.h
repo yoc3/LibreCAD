@@ -23,8 +23,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 **********************************************************************/
 
 
-#ifndef RS_HYPERBOLA_H
-#define RS_HYPERBOLA_H
+#ifndef LC_HYPERBOLA_H
+#define LC_HYPERBOLA_H
 
 #include "rs_atomicentity.h"
 
@@ -34,9 +34,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * ratio is the ratio between semi-major and semi-minor axis
 
  */
-class RS_HyperbolaData {
+class LC_HyperbolaData {
 public:
-    RS_HyperbolaData(const RS_Vector& center,
+    LC_HyperbolaData(const RS_Vector& center,
                    const RS_Vector& majorP,
                    double ratio,
                    double angle1, double angle2,
@@ -50,9 +50,9 @@ public:
         this->reversed = reversed;
     }
 
-    friend class RS_Hyperbola;
+    friend class LC_Hyperbola;
 
-    friend std::ostream& operator << (std::ostream& os, const RS_HyperbolaData& ed) {
+    friend std::ostream& operator << (std::ostream& os, const LC_HyperbolaData& ed) {
         os << "(" << ed.center <<
            "/" << ed.majorP <<
            " " << ed.ratio <<
@@ -85,14 +85,14 @@ private:
  *
  * @author Dongxu Li
  */
-class RS_Hyperbola : public RS_AtomicEntity {
+class LC_Hyperbola : public RS_AtomicEntity {
 public:
-    RS_Hyperbola(RS_EntityContainer* parent,
-               const RS_HyperbolaData& d);
-    virtual ~RS_Hyperbola() {}
+    LC_Hyperbola(LC_EntityContainer* parent,
+               const LC_HyperbolaData& d);
+    virtual ~LC_Hyperbola() {}
 
-    virtual RS_Entity* clone() {
-        RS_Hyperbola* e = new RS_Hyperbola(*this);
+    virtual LC_Entity* clone() {
+        LC_Hyperbola* e = new LC_Hyperbola(*this);
         e->initId();
         return e;
     }
@@ -120,7 +120,7 @@ public:
 //#endif
 
     /** @return Copy of data that defines the hyperbola. **/
-    RS_HyperbolaData getData() const {
+    LC_HyperbolaData getData() const {
         return data;
     }
 
@@ -201,10 +201,10 @@ public:
 
 
 //    virtual RS_Vector getMiddlePoint(void)const;
-//    virtual RS_Vector getNearestEndpoint(const RS_Vector& coord,
-//                                         double* dist = NULL) const;
+    virtual RS_Vector getNearestEndpoint(const RS_Vector& coord,
+                                         double* dist = NULL) const;
 //    virtual RS_Vector getNearestPointOnEntity(const RS_Vector& coord,
-//            bool onEntity = true, double* dist = NULL, RS_Entity** entity=NULL) const;
+//            bool onEntity = true, double* dist = NULL, LC_Entity** entity=NULL) const;
 //    virtual RS_Vector getNearestCenter(const RS_Vector& coord,
 //                                       double* dist = NULL);
 //    virtual RS_Vector getNearestMiddle(const RS_Vector& coord,
@@ -215,14 +215,14 @@ public:
 //                                     const RS_Vector& coord,
 //                                     double* dist = NULL);
 //    virtual RS_Vector getNearestOrthTan(const RS_Vector& coord,
-//                                    const RS_Line& normal,
+//                                    const LC_Line& normal,
 //                                     bool onEntity = false);
 //    virtual double getDistanceToPoint(const RS_Vector& coord,
-//                                      RS_Entity** entity=NULL,
-//                                      RS2::ResolveLevel level=RS2::ResolveNone,
-//                                      double solidDist = RS_MAXDOUBLE) const;
+//                                      LC_Entity** entity=NULL,
+//                                      LC2::ResolveLevel level=LC2::ResolveNone,
+//                                      double solidDist = LC_MAXDOUBLE) const;
     virtual bool isPointOnEntity(const RS_Vector& coord,
-                                 double tolerance=RS_TOLERANCE) const;
+                                 double tolerance=LC_TOLERANCE) const;
 
     virtual void move(const RS_Vector& offset);
     virtual void rotate(const double& angle);
@@ -233,9 +233,9 @@ public:
     virtual void mirror(const RS_Vector& axisPoint1, const RS_Vector& axisPoint2);
     virtual void moveRef(const RS_Vector& ref, const RS_Vector& offset);
 
-    virtual void draw(RS_Painter* painter, RS_GraphicView* view, double& patternOffset);
+    virtual void draw(LC_Painter* painter, LC_GraphicView* view, double& patternOffset);
 
-    friend std::ostream& operator << (std::ostream& os, const RS_Hyperbola& a);
+    friend std::ostream& operator << (std::ostream& os, const LC_Hyperbola& a);
 
     //virtual void calculateEndpoints();
 //    virtual void calculateBorders();
@@ -246,7 +246,7 @@ public:
     std::vector<double> getEquation() const;
 
 protected:
-    RS_HyperbolaData data;
+    LC_HyperbolaData data;
 
 };
 
