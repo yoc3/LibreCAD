@@ -73,9 +73,51 @@
 
  LC_Quadratic LC_Quadratic::move(const RS_Vector& v)
  {
-     m_vLinear(0) += 2.*m_mQuad(0,0)*v.x + (m_mQuad(0,1)+m_mQuad(1,0))*v.y;
-     m_vLinear(1) += 2.*m_mQuad(1,1)*v.y + (m_mQuad(0,1)+m_mQuad(1,0))*v.x;
-     m_dConst += m_mQuad(0,0)*v.x*v.x + (m_mQuad(0,1)+m_mQuad(1,0))*v.x*v.y+ m_mQuad(1,1)*v.y*v.y ;
+     if(m_bIsQuadratic){
+         m_dConst += m_vLinear(0) * v.x + m_vLinear(1)*v.y;
+         m_vLinear(0) += 2.*m_mQuad(0,0)*v.x + (m_mQuad(0,1)+m_mQuad(1,0))*v.y;
+         m_vLinear(1) += 2.*m_mQuad(1,1)*v.y + (m_mQuad(0,1)+m_mQuad(1,0))*v.x;
+         m_dConst += m_mQuad(0,0)*v.x*v.x + (m_mQuad(0,1)+m_mQuad(1,0))*v.x*v.y+ m_mQuad(1,1)*v.y*v.y ;
+     }else{
+         m_dConst += m_mQuad(0,0)*v.x*v.x + (m_mQuad(0,1)+m_mQuad(1,0))*v.x*v.y+ m_mQuad(1,1)*v.y*v.y ;
+     }
      return *this;
  }
 
+
+ LC_Quadratic LC_Quadratic::rotate(const double& angle)
+ {
+     using namespace boost::numeric::ublas;
+     auto&& m=rotationMatrix(angle);
+     m_vLinear = prod(m, m_vLinear);
+     if(m_bIsQuadratic){
+         m_bIsQuadratic=prod(m_vLinear,m);
+         m_bIsQuadratic=prod( trans(m), m_vLinear);
+     }
+     return *this;
+ }
+
+ LC_Quadratic LC_Quadratic::rotate(const RS_Vector& center, const double& angle)
+ {
+     move(-center);
+     rotate(angle);
+     move(center);
+     return *this;
+ }
+
+ /**
+   rotation matrix:
+
+   cos x, -sin x
+   sin x, cos x
+   */
+boost::numeric::ublas::matrix<double>  LC_Quadratic::rotationMatrix(const double& angle)
+{
+    boost::numeric::ublas::matrix<double> ret(2,2);
+    ret(0,0)=cos(angle);
+    ret(1,0)=sin(angle);
+    ret(0,1)=-ret(1,0);
+    ret(1,1)=ret(0,0);
+    return ret;
+}
+//EOF

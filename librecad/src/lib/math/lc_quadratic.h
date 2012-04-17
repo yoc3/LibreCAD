@@ -45,6 +45,9 @@ public:
     std::vector<double> getCoeffficents() const;
     LC_Quadratic move(const RS_Vector& v);
     LC_Quadratic rotate(const double& a);
+    LC_Quadratic rotate(const RS_Vector& center, const double& a);
+    /** the matrix of rotation by angle **/
+    static boost::numeric::ublas::matrix<double> rotationMatrix(const double& angle);
 
     private:
     boost::numeric::ublas::matrix<double> m_mQuad;

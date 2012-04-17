@@ -138,6 +138,7 @@ HEADERS += \
     lib/engine/rs_fontlist.h \
     lib/engine/rs_graphic.h \
     lib/engine/rs_hatch.h \
+    lib/engine/lc_hyperbola.h \
     lib/engine/rs_insert.h \
     lib/engine/rs_image.h \
     lib/engine/rs_layer.h \
@@ -227,6 +228,7 @@ SOURCES += \
     lib/engine/rs_fontlist.cpp \
     lib/engine/rs_graphic.cpp \
     lib/engine/rs_hatch.cpp \
+    lib/engine/lc_hyperbola.cpp \
     lib/engine/rs_insert.cpp \
     lib/engine/rs_image.cpp \
     lib/engine/rs_layer.cpp \
