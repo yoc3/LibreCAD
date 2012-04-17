@@ -40,9 +40,9 @@
 /**
  * Constructor.
  */
-LC_Hyperbola::LC_Hyperbola(LC_EntityContainer* parent,
+LC_Hyperbola::LC_Hyperbola(RS_EntityContainer* parent,
                        const LC_HyperbolaData& d)
-    :LC_AtomicEntity(parent), data(d) {
+    :RS_AtomicEntity(parent), data(d) {
 
     //calculateEndpoints();
     calculateBorders();
@@ -99,19 +99,20 @@ bool LC_Hyperbola::isPointOnEntity(const RS_Vector& coord,
     double b=a*data.ratio;
     if(fabs(a)<tolerance || fabs(b)<tolerance) return false;
     RS_Vector vp(coord - data.center);
-    vp=vp.rotate(-data.majorP.angle()).scale(1./a,1./b);
-    return vp.squared()<tolerance;
+    vp=vp.rotate(-data.majorP.angle());
+    return fabs( vp.x*vp.x/(a*a)- vp.y*vp.y/(b*b) -1.)<tolerance;
 }
 
 
 std::vector<double> LC_Hyperbola::getEquation() const
 {
+    return std::vector<double>(0,0.);
 }
 
-RS_Vector LC_Hyperbola::getNearestEndpoint(const RS_Vector& /*coord*/,
-                                         double* /*dist*/ = NULL) const
-{
-}
+//RS_Vector LC_Hyperbola::getNearestEndpoint(const RS_Vector& /*coord*/,
+//                                         double* /*dist*/ = NULL) const
+//{
+//}
 
 /**
  * Dumps the point's data to stdout.

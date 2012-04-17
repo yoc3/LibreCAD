@@ -87,11 +87,11 @@ private:
  */
 class LC_Hyperbola : public RS_AtomicEntity {
 public:
-    LC_Hyperbola(LC_EntityContainer* parent,
+    LC_Hyperbola(RS_EntityContainer* parent,
                const LC_HyperbolaData& d);
     virtual ~LC_Hyperbola() {}
 
-    virtual LC_Entity* clone() {
+    virtual RS_Entity* clone() {
         LC_Hyperbola* e = new LC_Hyperbola(*this);
         e->initId();
         return e;
@@ -123,7 +123,7 @@ public:
     LC_HyperbolaData getData() const {
         return data;
     }
-
+    RS_VectorSolutions getFoci() const ;
     virtual RS_VectorSolutions getRefPoints();
 
     /**
@@ -199,41 +199,49 @@ public:
         return data.majorP.magnitude()*data.ratio;
     }
 
+    virtual void calculateBorders(){}
 
-//    virtual RS_Vector getMiddlePoint(void)const;
+    virtual RS_Vector getMiddlePoint(void)const {return RS_Vector(false);}
     virtual RS_Vector getNearestEndpoint(const RS_Vector& coord,
-                                         double* dist = NULL) const;
-//    virtual RS_Vector getNearestPointOnEntity(const RS_Vector& coord,
-//            bool onEntity = true, double* dist = NULL, LC_Entity** entity=NULL) const;
-//    virtual RS_Vector getNearestCenter(const RS_Vector& coord,
-//                                       double* dist = NULL);
-//    virtual RS_Vector getNearestMiddle(const RS_Vector& coord,
-//                                       double* dist = NULL,
-//                                       int middlePoints = 1
-//                                       )const;
-//    virtual RS_Vector getNearestDist(double distance,
-//                                     const RS_Vector& coord,
-//                                     double* dist = NULL);
-//    virtual RS_Vector getNearestOrthTan(const RS_Vector& coord,
-//                                    const LC_Line& normal,
-//                                     bool onEntity = false);
-//    virtual double getDistanceToPoint(const RS_Vector& coord,
-//                                      LC_Entity** entity=NULL,
-//                                      LC2::ResolveLevel level=LC2::ResolveNone,
-//                                      double solidDist = LC_MAXDOUBLE) const;
+                                         double* dist = NULL) const
+    {return RS_Vector(false);}
+    virtual RS_Vector getNearestPointOnEntity(const RS_Vector& coord,
+            bool onEntity = true, double* dist = NULL, RS_Entity** entity=NULL) const
+    {return RS_Vector(false);}
+    virtual RS_Vector getNearestCenter(const RS_Vector& coord,
+                                       double* dist = NULL)
+   {return RS_Vector(false);}
+    virtual RS_Vector getNearestMiddle(const RS_Vector& coord,
+                                       double* dist = NULL,
+                                       int middlePoints = 1
+                                       )const
+   {return RS_Vector(false);}
+    virtual RS_Vector getNearestDist(double distance,
+                                     const RS_Vector& coord,
+                                     double* dist = NULL)
+    {return RS_Vector(false);}
+    virtual RS_Vector getNearestOrthTan(const RS_Vector& coord,
+                                    const RS_Line& normal,
+                                     bool onEntity = false)
+    {return RS_Vector(false);}
+    virtual double getDistanceToPoint(const RS_Vector& coord,
+                                      RS_Entity** entity=NULL,
+                                      RS2::ResolveLevel level=RS2::ResolveNone,
+                                      double solidDist = RS_MAXDOUBLE) const
+    {return RS_MAXDOUBLE;}
     virtual bool isPointOnEntity(const RS_Vector& coord,
-                                 double tolerance=LC_TOLERANCE) const;
+                                 double tolerance=RS_TOLERANCE) const;
 
-    virtual void move(const RS_Vector& offset);
-    virtual void rotate(const double& angle);
-    virtual void rotate(const RS_Vector& angleVector);
-    virtual void rotate(const RS_Vector& center, const double& angle);
-    virtual void rotate(const RS_Vector& center, const RS_Vector& angle);
-    virtual void scale(const RS_Vector& center, const RS_Vector& factor);
-    virtual void mirror(const RS_Vector& axisPoint1, const RS_Vector& axisPoint2);
-    virtual void moveRef(const RS_Vector& ref, const RS_Vector& offset);
+    virtual void move(const RS_Vector& offset){}
+    virtual void rotate(const double& angle){}
+    virtual void rotate(const RS_Vector& angleVector){}
+    virtual void rotate(const RS_Vector& center, const double& angle){}
+    virtual void rotate(const RS_Vector& center, const RS_Vector& angle){}
+    virtual void scale(const RS_Vector& center, const RS_Vector& factor){}
+    virtual void mirror(const RS_Vector& axisPoint1, const RS_Vector& axisPoint2){}
+    virtual void moveRef(const RS_Vector& ref, const RS_Vector& offset){}
 
-    virtual void draw(LC_Painter* painter, LC_GraphicView* view, double& patternOffset);
+    virtual void draw(RS_Painter* painter, RS_GraphicView* view, double& patternOffset){}
 
     friend std::ostream& operator << (std::ostream& os, const LC_Hyperbola& a);
 
@@ -241,8 +249,8 @@ public:
 //    virtual void calculateBorders();
 
     //direction of tangent at endpoints
-    virtual double getDirection1() const;
-    virtual double getDirection2() const;
+    virtual double getDirection1() const{return 0.;}
+    virtual double getDirection2() const{return 0.;}
     std::vector<double> getEquation() const;
 
 protected:

@@ -33,7 +33,7 @@
 #include "rs_constructionline.h"
 #include "rs_graphicview.h"
 #include "rs_modification.h"
-#include "rs_hyperbola.h"
+#include "lc_hyperbola.h"
 
 /**
  * Default constructor.
@@ -927,7 +927,7 @@ RS_Line* RS_Creation::createTangent2(const RS_Vector& coord,
     if(c > 1. + RS_TOLERANCE) {
         //not circle in circle, there's a hyperbola path
     c= (e1->getRadius()  - e2->getRadius())/dist;
-    ret.push_back(new RS_Hyperbola(NULL, RS_HyperbolaData(cp,vp*c,sqrt(1. - c*c),0.,0.,false)));
+    ret.push_back(new LC_Hyperbola(NULL, LC_HyperbolaData(cp,vp*c,sqrt(1. - c*c),0.,0.,false)));
     return ret;
 }
     ret.push_back( new RS_Line(NULL, RS_LineData(cp, RS_Vector(cp.x - vp.y, cp.y+vp.x))));

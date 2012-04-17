@@ -69,6 +69,7 @@
          ret.push_back(m_vLinear(0));
          ret.push_back(m_vLinear(1));
          ret.push_back(m_dConst);
+         return ret;
  }
 
  LC_Quadratic LC_Quadratic::move(const RS_Vector& v)
@@ -91,8 +92,8 @@
      auto&& m=rotationMatrix(angle);
      m_vLinear = prod(m, m_vLinear);
      if(m_bIsQuadratic){
-         m_bIsQuadratic=prod(m_vLinear,m);
-         m_bIsQuadratic=prod( trans(m), m_vLinear);
+         m_mQuad=prod(m_mQuad,m);
+         m_mQuad=prod( trans(m), m_mQuad);
      }
      return *this;
  }
