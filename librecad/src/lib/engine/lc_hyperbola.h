@@ -28,6 +28,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "rs_atomicentity.h"
 
+class LC_Quadratic;
+
 /**
  * Holds the data that defines one branch of a hyperbola.
  * majorP is the vector from center to the vertex
@@ -251,7 +253,16 @@ public:
     //direction of tangent at endpoints
     virtual double getDirection1() const{return 0.;}
     virtual double getDirection2() const{return 0.;}
-    std::vector<double> getEquation() const;
+    /** return the equation of the entity
+    for quadratic,
+
+    return a vector contains:
+    m0 x^2 + m1 xy + m2 y^2 + m3 x + m4 y + m5 =0
+
+    for linear:
+    m0 x + m1 y + m2 =0
+    **/
+    LC_Quadratic getQuadratic() const;
 
 protected:
     LC_HyperbolaData data;

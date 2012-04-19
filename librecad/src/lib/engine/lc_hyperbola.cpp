@@ -32,6 +32,8 @@
 #include "rs_painter.h"
 #include "rs_information.h"
 #include "rs_linetypepattern.h"
+#include "lc_quadratic.h"
+
 
 #ifdef EMU_C99
 #include "emu_c99.h" /* C99 math */
@@ -104,9 +106,18 @@ bool LC_Hyperbola::isPointOnEntity(const RS_Vector& coord,
 }
 
 
-std::vector<double> LC_Hyperbola::getEquation() const
+LC_Quadratic LC_Hyperbola::getQuadratic() const
 {
-    return std::vector<double>(0,0.);
+    std::vector<double> ce(6,0.);
+    ce[0]=data.majorP.squared();
+    ce[2]=-data.ratio*data.ratio*ce[0];
+    if(ce[0]>RS_TOLERANCE) ce[0]=1./ce[0];
+    if(ce[2]>RS_TOLERANCE) ce[2]=1./ce[2];
+    ce[5]=-1.;
+    LC_Quadratic ret(ce);
+    ret.rotate(data.majorP.angle());
+    ret.move(data.center);
+    return ret;
 }
 
 //RS_Vector LC_Hyperbola::getNearestEndpoint(const RS_Vector& /*coord*/,

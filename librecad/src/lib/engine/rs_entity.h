@@ -50,7 +50,7 @@ class RS_Point;
 class RS_Polyline;
 class RS_Text;
 class RS_Layer;
-
+class LC_Quadratic;
 
 
 /**
@@ -568,10 +568,8 @@ m0 x^2 + m1 xy + m2 y^2 + m3 x + m4 y + m5 =0
 for linear:
 m0 x + m1 y + m2 =0
 **/
-    std::vector<double> getEquation() const
-    {
-        return std::vector<double>(0,0.);
-    }
+    LC_Quadratic getQuadratic() const;
+
 
 protected:
     //! Entity's parent entity or NULL is this entity has no parent.
