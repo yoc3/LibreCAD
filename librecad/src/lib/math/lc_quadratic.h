@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
-
+class RS_VectorSolutions;
 
 /**
  * Class for generic linear and quadratic equation
@@ -46,10 +46,15 @@ public:
     LC_Quadratic move(const RS_Vector& v);
     LC_Quadratic rotate(const double& a);
     LC_Quadratic rotate(const RS_Vector& center, const double& a);
+    bool isQuadratic(){
+        return m_bIsQuadratic;
+    }
     /** the matrix of rotation by angle **/
     static boost::numeric::ublas::matrix<double> rotationMatrix(const double& angle);
 
-    private:
+    static RS_VectorSolutions getIntersection(const LC_Quadratic& l1, const LC_Quadratic& l2);
+
+//    private:
     boost::numeric::ublas::matrix<double> m_mQuad;
     boost::numeric::ublas::vector<double> m_vLinear;
     double m_dConst;

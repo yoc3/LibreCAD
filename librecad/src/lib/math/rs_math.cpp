@@ -838,6 +838,9 @@ RS_VectorSolutions RS_Math::simultaneousQuadraticSolverFull(const std::vector<st
 {
     RS_VectorSolutions ret;
     if(m.size()!=2)  return ret;
+    if( m[0].size() ==3 || m[1].size()==3 ){
+        return simultaneousQuadraticSolverMixed(m);
+    }
     if(m[0].size()!=6 || m[1].size()!=6) return ret;
     /** eliminate x, quartic equation of y **/
     auto& a=m[0][0];
@@ -941,6 +944,59 @@ RS_VectorSolutions RS_Math::simultaneousQuadraticSolverFull(const std::vector<st
     }
     //    std::cout<<"ret="<<ret<<std::endl;
     return ret;
+}
+
+RS_VectorSolutions RS_Math::simultaneousQuadraticSolverMixed(const std::vector<std::vector<double> >& m)
+{
+    auto p0=& (m[0]);
+    auto p1=& (m[1]);
+    if(p1->size()==3){
+        std::swap(p0,p1);
+    }
+    if(p1->size()==3) {
+            //linear
+            QVector<double> sn(2,0.);
+            auto ce=QVector::fromStdVector(m);
+            ce[0][2]=-ce[0][2];
+            ce[1][2]=-ce[1][2];
+            if( RS_Math::linearSolver(QVector::fromStdVector(m),sn)) ret.push_back(RS_Vector(sn[0],sn[1]));
+            return ret;
+    }
+    const double& a=p0->at(0);
+    const double& b=p0->at(1);
+    const double& c=p0->at(2);
+    const double& d=p1->at(0);
+    const double& e=p1->at(1);
+    const double& f=p1->at(2);
+    const double& g=p1->at(3);
+    const double& h=p1->at(4);
+    const double& i=p1->at(5);
+    /**
+      y (2 b c d-a c e)-a c g+c^2 d = y^2 (a^2 (-f)+a b e-b^2 d)+y (a b g-a^2 h)+a^2 (-i)
+      */
+    std::vector<double> ce(3,0.);
+    const double&& a2=a*a;
+    const double&& b2=b*b;
+    const double&& c2=c*c;
+    ce[0]= -f*a2+a*b*e-b2*d;
+    ce[1]=a*b*g-a2*h- (2*b*c*d-a*c*e);
+    ce[2]=a*c*g-c2*d-a2*i;
+    std::vector<double> roots(0,0.);
+    if(fabs(ce[0])<1e-75){
+        if(fabs(ce[1])>1e-75){
+        roots.push_back( - ce[2]/ce[1]);
+        }
+    }else{
+        std::vector<double> ce2(2,0.);
+        ce2[0]=ce[1]/ce[0];
+        ce2[1]=ce[2]/ce[0];
+        roots=quadraticSolver(ce2);
+    }
+    if(roots.size()==0)  return RS_VectorSolutions();
+
+    RS_VectorSolutions ret;
+    return ret;
+
 }
 
 /** verify a solution for simultaneousQuadratic

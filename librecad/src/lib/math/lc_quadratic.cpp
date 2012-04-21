@@ -24,6 +24,7 @@
 **
 **********************************************************************/
 
+#include "rs_math.h"
 #include "lc_quadratic.h"
 
 #ifdef EMU_C99
@@ -105,6 +106,33 @@
      move(center);
      return *this;
  }
+RS_VectorSolutions LC_Quadratic::getIntersection(const LC_Quadratic& l1, const LC_Quadratic& l2)
+{
+    RS_VectorSolutions ret;
+    auto p1=&l1;
+    auto p2=&l2;
+    if(p1->isQuadratic()==false){
+        std::swap(p1,p2);
+    }
+    if(p1->isQuadratic()==false){
+        //two lines
+        QVector<QVector<double> > ce(2,QVector<double>(3,0.));
+        ce[0][0]=p1->m_vLinear(0);
+        ce[0][1]=p1->m_vLinear(1);
+        ce[0][2]=-p1->m_dConst;
+        ce[1][0]=p2->m_vLinear(0);
+        ce[1][1]=p2->m_vLinear(1);
+        ce[1][2]=-p2->m_dConst;
+        QVector<double> sn(2,0.);
+        if(RS_Math::linearSolver(ce,sn)){
+            ret.push_back(RS_Vector(sn[0],sn[1]));
+        }
+            return ret;
+    }
+    if(p2->isQuadratic()==false){
+
+    }
+}
 
  /**
    rotation matrix:
