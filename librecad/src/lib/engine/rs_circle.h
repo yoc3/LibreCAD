@@ -198,7 +198,8 @@ with Cx the center of the common tangent circle, Rx the radius. Ci and Ri are th
     virtual void scale(const RS_Vector& center, const RS_Vector& factor);
     virtual void mirror(const RS_Vector& axisPoint1, const RS_Vector& axisPoint2);
     virtual void moveRef(const RS_Vector& ref, const RS_Vector& offset);
-
+    /** whether the entity's bounding box intersects with visible portion of graphic view */
+    virtual bool isVisibleInWindow(RS_GraphicView* view) const;
     virtual void draw(RS_Painter* painter, RS_GraphicView* view, double& patternOffset);
     /** return the equation of the entity
 for quadratic,

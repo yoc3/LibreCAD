@@ -948,6 +948,7 @@ RS_VectorSolutions RS_Math::simultaneousQuadraticSolverFull(const std::vector<st
 
 RS_VectorSolutions RS_Math::simultaneousQuadraticSolverMixed(const std::vector<std::vector<double> >& m)
 {
+    RS_VectorSolutions ret;
     auto p0=& (m[0]);
     auto p1=& (m[1]);
     if(p1->size()==3){
@@ -956,10 +957,12 @@ RS_VectorSolutions RS_Math::simultaneousQuadraticSolverMixed(const std::vector<s
     if(p1->size()==3) {
             //linear
             QVector<double> sn(2,0.);
-            auto ce=QVector::fromStdVector(m);
+            QVector<QVector<double> > ce;
+            ce << QVector<double>::fromStdVector(m[0]);
+            ce << QVector<double>::fromStdVector(m[1]);
             ce[0][2]=-ce[0][2];
             ce[1][2]=-ce[1][2];
-            if( RS_Math::linearSolver(QVector::fromStdVector(m),sn)) ret.push_back(RS_Vector(sn[0],sn[1]));
+            if( RS_Math::linearSolver(ce,sn)) ret.push_back(RS_Vector(sn[0],sn[1]));
             return ret;
     }
     const double& a=p0->at(0);
@@ -994,7 +997,6 @@ RS_VectorSolutions RS_Math::simultaneousQuadraticSolverMixed(const std::vector<s
     }
     if(roots.size()==0)  return RS_VectorSolutions();
 
-    RS_VectorSolutions ret;
     return ret;
 
 }

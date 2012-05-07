@@ -51,7 +51,7 @@ class RS_Polyline;
 class RS_Text;
 class RS_Layer;
 class LC_Quadratic;
-
+class RS_GraphicView;
 
 /**
  * Base class for an entity (line, arc, circle, ...)
@@ -539,6 +539,9 @@ public:
         return;
     }
 
+
+    /** whether the entity's bounding box intersects with visible portion of graphic view */
+    virtual bool isVisibleInWindow(RS_GraphicView* view) const;
     /**
      * Implementations must draw the entity on the given device.
      */

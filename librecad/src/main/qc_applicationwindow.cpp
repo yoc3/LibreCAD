@@ -2736,6 +2736,8 @@ void QC_ApplicationWindow::
         // update recent files menu:
         recentFiles->add(fileName);
         openedFiles.append(fileName);
+        layerWidget->slotUpdateLayerList();
+
         RS_DEBUG->print("QC_ApplicationWindow::slotFileOpen: update recent file menu: 2");
         updateRecentFilesMenu();
 
@@ -2925,11 +2927,17 @@ void QC_ApplicationWindow::slotFileExport() {
                 filters.append(st);
         }
 
-        QFileDialog fileDlg(this);
+        // set dialog options: filters, mode, accept, directory, filename
+        QFileDialog fileDlg(this, "Export as");
         fileDlg.setFilters(filters);
         fileDlg.setFileMode(QFileDialog::AnyFile);
-        fileDlg.selectFilter(defFilter);
+        fileDlg.setFilter(defFilter);
         fileDlg.setAcceptMode(QFileDialog::AcceptSave);
+        fileDlg.setDirectory(defDir);
+        fn = QFileInfo(w->getDocument()->getFilename()).baseName();
+        if(fn==NULL)
+            fn = "unnamed";
+        fileDlg.selectFile(fn);
 
         if (fileDlg.exec()==QDialog::Accepted) {
             QStringList files = fileDlg.selectedFiles();
@@ -2968,7 +2976,7 @@ void QC_ApplicationWindow::slotFileExport() {
             dlg.setGraphicSize(w->getGraphic()->getSize());
             if (dlg.exec()) {
                 bool ret = slotFileExport(fn, format, dlg.getSize(),
-                                          dlg.isBackgroundBlack());
+                            dlg.isBackgroundBlack(), dlg.isBlackWhite());
                 if (ret) {
                     QString message = tr("Exported: %1").arg(fn);
                     statusBar()->showMessage(message, 2000);

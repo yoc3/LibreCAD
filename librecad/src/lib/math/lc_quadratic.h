@@ -46,7 +46,7 @@ public:
     LC_Quadratic move(const RS_Vector& v);
     LC_Quadratic rotate(const double& a);
     LC_Quadratic rotate(const RS_Vector& center, const double& a);
-    bool isQuadratic(){
+    bool isQuadratic() const {
         return m_bIsQuadratic;
     }
     /** the matrix of rotation by angle **/
