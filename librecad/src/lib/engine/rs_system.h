@@ -47,12 +47,10 @@ class RS_System {
 protected:
     RS_System() {
         initialized = false;
-        allKnownLocales=NULL;
     }
     ~RS_System() {
-        while (!allKnownLocales->isEmpty())
-             delete allKnownLocales->takeFirst();
-        delete allKnownLocales;
+        while (!allKnownLocales.isEmpty())
+             delete allKnownLocales.takeFirst();
     }
 
 public:
@@ -62,7 +60,6 @@ public:
     static RS_System* instance() {
         if (uniqueInstance==NULL) {
             uniqueInstance = new RS_System();
-            uniqueInstance->allKnownLocales=NULL;
         }
         return uniqueInstance;
     }
@@ -203,7 +200,7 @@ protected:
 
     QStringList languageList;
     bool initialized;
-    QList<RS_Locale* > *allKnownLocales;
+    QList<RS_Locale* > allKnownLocales;
 
 };
 
