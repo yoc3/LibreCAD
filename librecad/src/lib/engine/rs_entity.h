@@ -53,6 +53,7 @@ class RS_Layer;
 class LC_Quadratic;
 class RS_GraphicView;
 
+
 /**
  * Base class for an entity (line, arc, circle, ...)
  *

@@ -109,7 +109,7 @@ void RS_System::initLanguageList() {
 }
 
 void RS_System::addLocale(RS_Locale *locale) {
-    allKnownLocales.append(locale);
+    allKnownLocales.push_back(QSharedPointer<RS_Locale>(locale));
 }
 
 #define LNG(canonical, direction, name) \

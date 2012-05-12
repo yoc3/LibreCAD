@@ -30,6 +30,7 @@
 
 #include <QDir>
 #include <QList>
+#include <QSharedPointer>
 
 #include "rs_debug.h"
 #include "rs_locale.h"
@@ -48,10 +49,10 @@ protected:
     RS_System() {
         initialized = false;
     }
-    ~RS_System() {
-        while (!allKnownLocales.isEmpty())
-             delete allKnownLocales.takeFirst();
-    }
+//    ~RS_System() {
+//        while (!allKnownLocales.isEmpty())
+//             delete allKnownLocales.takeFirst();
+//    }
 
 public:
     /**
@@ -200,7 +201,7 @@ protected:
 
     QStringList languageList;
     bool initialized;
-    QList<RS_Locale* > allKnownLocales;
+    QList<QSharedPointer<RS_Locale> > allKnownLocales;
 
 };
 
