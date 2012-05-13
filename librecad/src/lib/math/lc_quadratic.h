@@ -41,7 +41,7 @@ class RS_VectorSolutions;
  */
 class LC_Quadratic {
 public:
-    explicit LC_Quadratic(bool valid = false);
+    explicit LC_Quadratic();
     LC_Quadratic(std::vector<double> ce);
     std::vector<double> getCoefficients() const;
     LC_Quadratic move(const RS_Vector& v);

@@ -35,7 +35,10 @@
  * Constructor.
  */
 
-LC_Quadratic::LC_Quadratic(bool valid):m_bValid(valid){}
+LC_Quadratic::LC_Quadratic():
+    m_mQuad(2,2),
+    m_vLinear(2),
+    m_bValid(false){}
 
 LC_Quadratic::LC_Quadratic(std::vector<double> ce):
     m_mQuad(2,2),
