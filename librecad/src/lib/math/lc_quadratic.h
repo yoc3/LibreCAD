@@ -42,13 +42,19 @@ class RS_VectorSolutions;
 class LC_Quadratic {
 public:
     LC_Quadratic(std::vector<double> ce);
-    std::vector<double> getCoeffficents() const;
+    std::vector<double> getCoefficients() const;
     LC_Quadratic move(const RS_Vector& v);
     LC_Quadratic rotate(const double& a);
     LC_Quadratic rotate(const RS_Vector& center, const double& a);
+    /** whether it's quadratic or linear
+      @return true, if quadratic;
+      return false, if linear
+ */
     bool isQuadratic() const {
         return m_bIsQuadratic;
     }
+    /** switch x,y coordinates */
+    LC_Quadratic flipXY(void) const;
     /** the matrix of rotation by angle **/
     static boost::numeric::ublas::matrix<double> rotationMatrix(const double& angle);
 

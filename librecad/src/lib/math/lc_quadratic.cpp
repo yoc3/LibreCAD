@@ -34,78 +34,90 @@
 /**
  * Constructor.
  */
- LC_Quadratic::LC_Quadratic(std::vector<double> ce):
-     m_mQuad(2,2),
-     m_vLinear(2)
- {
-     if(ce.size()==6){
-         //quadratic
-         m_mQuad(0,0)=ce[0];
-         m_mQuad(0,1)=0.5*ce[1];
-         m_mQuad(1,0)=m_mQuad(0,1);
-         m_mQuad(1,1)=ce[2];
-         m_vLinear(0)=ce[3];
-         m_vLinear(1)=ce[4];
-         m_dConst=ce[5];
-         m_bIsQuadratic=true;
-         return;
-     }
-         m_bIsQuadratic=false;
-     if(ce.size()==3){
-         m_vLinear(0)=ce[0];
-         m_vLinear(1)=ce[1];
-         m_dConst=ce[2];
-     }
+LC_Quadratic::LC_Quadratic(std::vector<double> ce):
+    m_mQuad(2,2),
+    m_vLinear(2)
+{
+    if(ce.size()==6){
+        //quadratic
+        m_mQuad(0,0)=ce[0];
+        m_mQuad(0,1)=0.5*ce[1];
+        m_mQuad(1,0)=m_mQuad(0,1);
+        m_mQuad(1,1)=ce[2];
+        m_vLinear(0)=ce[3];
+        m_vLinear(1)=ce[4];
+        m_dConst=ce[5];
+        m_bIsQuadratic=true;
+        return;
+    }
+    m_bIsQuadratic=false;
+    if(ce.size()==3){
+        m_vLinear(0)=ce[0];
+        m_vLinear(1)=ce[1];
+        m_dConst=ce[2];
+    }
 
- }
+}
 
- std::vector<double>  LC_Quadratic::getCoeffficents() const
- {
-     std::vector<double> ret(0,0.);
-     if(m_bIsQuadratic){
-         ret.push_back(m_mQuad(0,0));
-         ret.push_back(m_mQuad(0,1)+m_mQuad(1,0));
-         ret.push_back(m_mQuad(1,1));
-     }
-         ret.push_back(m_vLinear(0));
-         ret.push_back(m_vLinear(1));
-         ret.push_back(m_dConst);
-         return ret;
- }
+std::vector<double>  LC_Quadratic::getCoefficients() const
+{
+    std::vector<double> ret(0,0.);
+    if(m_bIsQuadratic){
+        ret.push_back(m_mQuad(0,0));
+        ret.push_back(m_mQuad(0,1)+m_mQuad(1,0));
+        ret.push_back(m_mQuad(1,1));
+    }
+    ret.push_back(m_vLinear(0));
+    ret.push_back(m_vLinear(1));
+    ret.push_back(m_dConst);
+    return ret;
+}
 
- LC_Quadratic LC_Quadratic::move(const RS_Vector& v)
- {
-     if(m_bIsQuadratic){
-         m_dConst += m_vLinear(0) * v.x + m_vLinear(1)*v.y;
-         m_vLinear(0) += 2.*m_mQuad(0,0)*v.x + (m_mQuad(0,1)+m_mQuad(1,0))*v.y;
-         m_vLinear(1) += 2.*m_mQuad(1,1)*v.y + (m_mQuad(0,1)+m_mQuad(1,0))*v.x;
-         m_dConst += m_mQuad(0,0)*v.x*v.x + (m_mQuad(0,1)+m_mQuad(1,0))*v.x*v.y+ m_mQuad(1,1)*v.y*v.y ;
-     }else{
-         m_dConst += m_mQuad(0,0)*v.x*v.x + (m_mQuad(0,1)+m_mQuad(1,0))*v.x*v.y+ m_mQuad(1,1)*v.y*v.y ;
-     }
-     return *this;
- }
+LC_Quadratic LC_Quadratic::move(const RS_Vector& v)
+{
+    if(m_bIsQuadratic){
+        m_dConst += m_vLinear(0) * v.x + m_vLinear(1)*v.y;
+        m_vLinear(0) += 2.*m_mQuad(0,0)*v.x + (m_mQuad(0,1)+m_mQuad(1,0))*v.y;
+        m_vLinear(1) += 2.*m_mQuad(1,1)*v.y + (m_mQuad(0,1)+m_mQuad(1,0))*v.x;
+        m_dConst += m_mQuad(0,0)*v.x*v.x + (m_mQuad(0,1)+m_mQuad(1,0))*v.x*v.y+ m_mQuad(1,1)*v.y*v.y ;
+    }else{
+        m_dConst += m_mQuad(0,0)*v.x*v.x + (m_mQuad(0,1)+m_mQuad(1,0))*v.x*v.y+ m_mQuad(1,1)*v.y*v.y ;
+    }
+    return *this;
+}
 
 
- LC_Quadratic LC_Quadratic::rotate(const double& angle)
- {
-     using namespace boost::numeric::ublas;
-     auto&& m=rotationMatrix(angle);
-     m_vLinear = prod(m, m_vLinear);
-     if(m_bIsQuadratic){
-         m_mQuad=prod(m_mQuad,m);
-         m_mQuad=prod( trans(m), m_mQuad);
-     }
-     return *this;
- }
+LC_Quadratic LC_Quadratic::rotate(const double& angle)
+{
+    using namespace boost::numeric::ublas;
+    auto&& m=rotationMatrix(angle);
+    m_vLinear = prod(m, m_vLinear);
+    if(m_bIsQuadratic){
+        m_mQuad=prod(m_mQuad,m);
+        m_mQuad=prod( trans(m), m_mQuad);
+    }
+    return *this;
+}
 
- LC_Quadratic LC_Quadratic::rotate(const RS_Vector& center, const double& angle)
- {
-     move(-center);
-     rotate(angle);
-     move(center);
-     return *this;
- }
+LC_Quadratic LC_Quadratic::rotate(const RS_Vector& center, const double& angle)
+{
+    move(-center);
+    rotate(angle);
+    move(center);
+    return *this;
+}
+/** switch x,y coordinates */
+LC_Quadratic LC_Quadratic::flipXY(void) const
+{
+        LC_Quadratic qf(*this);
+    if(isQuadratic()){
+        std::swap(qf.m_mQuad(0,0),qf.m_mQuad(1,1));
+        std::swap(qf.m_mQuad(0,1),qf.m_mQuad(1,0));
+    }
+    std::swap(qf.m_vLinear(0),qf.m_vLinear(1));
+    return qf;
+}
+
 RS_VectorSolutions LC_Quadratic::getIntersection(const LC_Quadratic& l1, const LC_Quadratic& l2)
 {
     RS_VectorSolutions ret;
@@ -127,14 +139,28 @@ RS_VectorSolutions LC_Quadratic::getIntersection(const LC_Quadratic& l1, const L
         if(RS_Math::linearSolver(ce,sn)){
             ret.push_back(RS_Vector(sn[0],sn[1]));
         }
-            return ret;
+        return ret;
     }
     if(p2->isQuadratic()==false){
+        //one line, one quadratic
+        if(fabs(p2->m_vLinear(0))<fabs(p2->m_vLinear(1))){
+            return getIntersection(p1->flipXY(),p2->flipXY()).flipXY();
+        }
 
+    }
+    std::vector<std::vector<double> >  ce(0);
+    ce.push_back(p1->getCoefficients());
+    ce.push_back(p2->getCoefficients());
+
+    if(p2->isQuadratic()){
+        //both quadratic
+        return RS_Math::simultaneousQuadraticSolverFull(ce);
+    }else{
+        return RS_Math::simultaneousQuadraticSolverMixed(ce);
     }
 }
 
- /**
+/**
    rotation matrix:
 
    cos x, -sin x
