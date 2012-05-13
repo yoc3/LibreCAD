@@ -34,6 +34,9 @@
 /**
  * Constructor.
  */
+
+LC_Quadratic::LC_Quadratic(bool valid):m_bValid(valid){}
+
 LC_Quadratic::LC_Quadratic(std::vector<double> ce):
     m_mQuad(2,2),
     m_vLinear(2)
@@ -48,6 +51,7 @@ LC_Quadratic::LC_Quadratic(std::vector<double> ce):
         m_vLinear(1)=ce[4];
         m_dConst=ce[5];
         m_bIsQuadratic=true;
+        m_bValid=true;
         return;
     }
     m_bIsQuadratic=false;
@@ -55,8 +59,10 @@ LC_Quadratic::LC_Quadratic(std::vector<double> ce):
         m_vLinear(0)=ce[0];
         m_vLinear(1)=ce[1];
         m_dConst=ce[2];
+        m_bValid=true;
+        return;
     }
-
+        m_bValid=false;
 }
 
 std::vector<double>  LC_Quadratic::getCoefficients() const

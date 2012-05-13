@@ -41,6 +41,7 @@ class RS_VectorSolutions;
  */
 class LC_Quadratic {
 public:
+    explicit LC_Quadratic(bool valid = false);
     LC_Quadratic(std::vector<double> ce);
     std::vector<double> getCoefficients() const;
     LC_Quadratic move(const RS_Vector& v);
@@ -53,6 +54,11 @@ public:
     bool isQuadratic() const {
         return m_bIsQuadratic;
     }
+    bool isValid()
+    {
+            return m_bValid;
+    }
+
     /** switch x,y coordinates */
     LC_Quadratic flipXY(void) const;
     /** the matrix of rotation by angle **/
@@ -65,6 +71,8 @@ public:
     boost::numeric::ublas::vector<double> m_vLinear;
     double m_dConst;
     bool m_bIsQuadratic;
+    /** whether this quadratic form is valid */
+    bool m_bValid;
 };
 
 
