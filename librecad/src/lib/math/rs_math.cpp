@@ -996,6 +996,9 @@ RS_VectorSolutions RS_Math::simultaneousQuadraticSolverMixed(const std::vector<s
         roots=quadraticSolver(ce2);
     }
     if(roots.size()==0)  return RS_VectorSolutions();
+    for(int i=0;i<roots.size();i++){
+        ret.push_back(RS_Vector(-(b*roots.at(i)+c)/a,roots.at(i)));
+    }
 
     return ret;
 

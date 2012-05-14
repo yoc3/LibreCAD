@@ -140,7 +140,6 @@ RS_VectorSolutions LC_Quadratic::getIntersection(const LC_Quadratic& l1, const L
     }
     if(p1->isQuadratic()==false){
         //two lines
-        std::cout<<"linear-linear: begin"<<std::endl;
         QVector<QVector<double> > ce(2,QVector<double>(3,0.));
         ce[0][0]=p1->m_vLinear(0);
         ce[0][1]=p1->m_vLinear(1);
@@ -156,10 +155,8 @@ RS_VectorSolutions LC_Quadratic::getIntersection(const LC_Quadratic& l1, const L
     }
     if(p2->isQuadratic()==false){
         //one line, one quadratic
-        std::cout<<"linear-quadratic begin"<<std::endl;
+        //avoid division by zero
         if(fabs(p2->m_vLinear(0))<fabs(p2->m_vLinear(1))){
-            auto&& ret2=getIntersection(p1->flipXY(),p2->flipXY()).flipXY();
-            std::cout<<" roots: "<<ret2<<std::endl;
             return getIntersection(p1->flipXY(),p2->flipXY()).flipXY();
         }
 
@@ -167,23 +164,8 @@ RS_VectorSolutions LC_Quadratic::getIntersection(const LC_Quadratic& l1, const L
     std::vector<std::vector<double> >  ce(0);
     ce.push_back(p1->getCoefficients());
     ce.push_back(p2->getCoefficients());
+    return RS_Math::simultaneousQuadraticSolverFull(ce);
 
-    if(p2->isQuadratic()){
-        //both quadratic
-        std::cout<<"quadratic-quadratic solver"<<std::endl;
-        std::cout<<*p1<<std::endl;
-        std::cout<<*p2<<std::endl;
-        auto&& ret2=RS_Math::simultaneousQuadraticSolverFull(ce);
-        std::cout<<" roots: "<<ret2<<std::endl;
-        return RS_Math::simultaneousQuadraticSolverFull(ce);
-    }else{
-        std::cout<<"linear-quadratic solver"<<std::endl;
-        std::cout<<*p1<<std::endl;
-        std::cout<<*p2<<std::endl;
-        auto&& ret2=RS_Math::simultaneousQuadraticSolverMixed(ce);
-        std::cout<<" roots: "<<ret2<<std::endl;
-        return RS_Math::simultaneousQuadraticSolverMixed(ce);
-    }
 }
 
 /**
