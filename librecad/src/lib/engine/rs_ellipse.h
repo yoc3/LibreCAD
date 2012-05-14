@@ -306,7 +306,7 @@ public:
     for linear:
     m0 x + m1 y + m2 =0
     **/
-    LC_Quadratic getQuadratic() const;
+    virtual LC_Quadratic getQuadratic() const;
 
 protected:
     RS_EllipseData data;

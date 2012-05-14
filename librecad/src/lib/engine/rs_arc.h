@@ -282,7 +282,7 @@ m0 x^2 + m1 xy + m2 y^2 + m3 x + m4 y + m5 =0
 for linear:
 m0 x + m1 y + m2 =0
 **/
-    LC_Quadratic getQuadratic() const;
+    virtual LC_Quadratic getQuadratic() const;
 
 protected:
     RS_ArcData data;

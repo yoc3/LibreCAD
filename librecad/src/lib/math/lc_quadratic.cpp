@@ -137,6 +137,7 @@ RS_VectorSolutions LC_Quadratic::getIntersection(const LC_Quadratic& l1, const L
     }
     if(p1->isQuadratic()==false){
         //two lines
+        std::cout<<"linear-linear: begin"<<std::endl;
         QVector<QVector<double> > ce(2,QVector<double>(3,0.));
         ce[0][0]=p1->m_vLinear(0);
         ce[0][1]=p1->m_vLinear(1);
