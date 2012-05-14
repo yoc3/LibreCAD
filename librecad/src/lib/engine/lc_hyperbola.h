@@ -106,7 +106,6 @@ public:
 
 
 
-//#ifdef  HAS_BOOST
 //    virtual double getLength() const;
 
 //    /**
@@ -117,9 +116,7 @@ public:
 //    **/
 //    double getHyperbolaLength(double a1, double a2) const;
 //    double getHyperbolaLength(double a2) const;
-//#else
 
-//#endif
 
     /** @return Copy of data that defines the hyperbola. **/
     LC_HyperbolaData getData() const {

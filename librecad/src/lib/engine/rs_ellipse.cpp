@@ -202,7 +202,6 @@ RS_Vector RS_Ellipse::getTangentDirection(const RS_Vector& point) const {
     return direction;
 }
 
-#ifdef  HAS_BOOST
 /**
   * find total length of the ellipse (arc)
   *
@@ -334,18 +333,7 @@ RS_Vector RS_Ellipse::getNearestDist(double distance,
         return vp1;
     }
 }
-#else
 
-//todo , implement this
-RS_Vector RS_Ellipse::getNearestDist(double /*distance*/,
-                                     const RS_Vector& /*coord*/,
-                                     double* dist) {
-    if (dist!=NULL) {
-        *dist = RS_MAXDOUBLE;
-    }
-    return RS_Vector(false);
-}
-#endif
 
 /**
   * switch the major/minor axis naming
