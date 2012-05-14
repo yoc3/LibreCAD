@@ -116,6 +116,7 @@ LC_Quadratic LC_Quadratic::rotate(const RS_Vector& center, const double& angle)
     move(center);
     return *this;
 }
+
 /** switch x,y coordinates */
 LC_Quadratic LC_Quadratic::flipXY(void) const
 {
@@ -156,6 +157,8 @@ RS_VectorSolutions LC_Quadratic::getIntersection(const LC_Quadratic& l1, const L
         //one line, one quadratic
         std::cout<<"linear-quadratic begin"<<std::endl;
         if(fabs(p2->m_vLinear(0))<fabs(p2->m_vLinear(1))){
+            auto&& ret2=getIntersection(p1->flipXY(),p2->flipXY()).flipXY();
+            std::cout<<" roots: "<<ret2<<std::endl;
             return getIntersection(p1->flipXY(),p2->flipXY()).flipXY();
         }
 
@@ -169,9 +172,15 @@ RS_VectorSolutions LC_Quadratic::getIntersection(const LC_Quadratic& l1, const L
         std::cout<<"quadratic-quadratic solver"<<std::endl;
         std::cout<<*p1<<std::endl;
         std::cout<<*p2<<std::endl;
+        auto&& ret2=RS_Math::simultaneousQuadraticSolverFull(ce);
+        std::cout<<" roots: "<<ret2<<std::endl;
         return RS_Math::simultaneousQuadraticSolverFull(ce);
     }else{
         std::cout<<"linear-quadratic solver"<<std::endl;
+        std::cout<<*p1<<std::endl;
+        std::cout<<*p2<<std::endl;
+        auto&& ret2=RS_Math::simultaneousQuadraticSolverMixed(ce);
+        std::cout<<" roots: "<<ret2<<std::endl;
         return RS_Math::simultaneousQuadraticSolverMixed(ce);
     }
 }
@@ -186,8 +195,8 @@ boost::numeric::ublas::matrix<double>  LC_Quadratic::rotationMatrix(const double
 {
     boost::numeric::ublas::matrix<double> ret(2,2);
     ret(0,0)=cos(angle);
-    ret(1,0)=sin(angle);
-    ret(0,1)=-ret(1,0);
+    ret(0,1)=sin(angle);
+    ret(1,0)=-ret(0,1);
     ret(1,1)=ret(0,0);
     return ret;
 }
@@ -203,13 +212,14 @@ std::ostream& operator << (std::ostream& os, const LC_Quadratic& q) {
         os<<" invalid quadratic form"<<std::endl;
         return os;
     }
+    os<<std::endl;
     auto&& ce=q.getCoefficients();
     unsigned short i=0;
     if(ce.size()==6){
         os<<ce[0]<<"*x^2 "<<( (ce[1]<0.)?" ":"+")<<ce[1]<<"*x*y  "<< ((ce[2]<0.)?" ":"+")<<ce[2]<<" y^2 ";
         i=3;
     }
-        os<<((ce[i]<0)?" ":"+")<<"*x "<<((ce[i+1]<0.)?" ":"+")<<ce[i+1]<<"*y "<< ((ce[i+2]<0.)?" ":"+")<<ce[i+2]<<" = 0"
+        os<<((ce[i]<0)?" ":"+")<<ce[i]<<"*x "<<((ce[i+1]<0.)?" ":"+")<<ce[i+1]<<"*y "<< ((ce[i+2]<0.)?" ":"+")<<ce[i+2]<<" == 0"
                                                                               <<std::endl;
     return os;
 }

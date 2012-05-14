@@ -1383,7 +1383,7 @@ LC_Quadratic RS_Ellipse::getQuadratic() const
     ce[0]=data.majorP.squared();
     ce[2]= data.ratio*data.ratio*ce[0];
     if(ce[0]<RS_TOLERANCE*RS_TOLERANCE || ce[2]<RS_TOLERANCE*RS_TOLERANCE){
-        return LC_Quadratic(ce);
+        return LC_Quadratic();
     }
     ce[0]=1./ce[0];
     ce[2]=1./ce[2];
