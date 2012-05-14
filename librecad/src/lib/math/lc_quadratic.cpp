@@ -85,12 +85,13 @@ std::vector<double>  LC_Quadratic::getCoefficients() const
 
 LC_Quadratic LC_Quadratic::move(const RS_Vector& v)
 {
+    if(m_bValid==false || v.valid == false) return *this;
+
+    m_dConst -= m_vLinear(0) * v.x + m_vLinear(1)*v.y;
+
     if(m_bIsQuadratic){
-        m_dConst += m_vLinear(0) * v.x + m_vLinear(1)*v.y;
-        m_vLinear(0) += 2.*m_mQuad(0,0)*v.x + (m_mQuad(0,1)+m_mQuad(1,0))*v.y;
-        m_vLinear(1) += 2.*m_mQuad(1,1)*v.y + (m_mQuad(0,1)+m_mQuad(1,0))*v.x;
-        m_dConst += m_mQuad(0,0)*v.x*v.x + (m_mQuad(0,1)+m_mQuad(1,0))*v.x*v.y+ m_mQuad(1,1)*v.y*v.y ;
-    }else{
+        m_vLinear(0) -= 2.*m_mQuad(0,0)*v.x + (m_mQuad(0,1)+m_mQuad(1,0))*v.y;
+        m_vLinear(1) -= 2.*m_mQuad(1,1)*v.y + (m_mQuad(0,1)+m_mQuad(1,0))*v.x;
         m_dConst += m_mQuad(0,0)*v.x*v.x + (m_mQuad(0,1)+m_mQuad(1,0))*v.x*v.y+ m_mQuad(1,1)*v.y*v.y ;
     }
     return *this;
@@ -216,10 +217,11 @@ std::ostream& operator << (std::ostream& os, const LC_Quadratic& q) {
     auto&& ce=q.getCoefficients();
     unsigned short i=0;
     if(ce.size()==6){
-        os<<ce[0]<<"*x^2 "<<( (ce[1]<0.)?" ":"+")<<ce[1]<<"*x*y  "<< ((ce[2]<0.)?" ":"+")<<ce[2]<<" y^2 ";
+        os<<ce[0]<<"*x^2 "<<( (ce[1]>=0.)?"+":" ")<<ce[1]<<"*x*y  "<< ((ce[2]>=0.)?"+":" ")<<ce[2]<<" y^2 ";
         i=3;
     }
-        os<<((ce[i]<0)?" ":"+")<<ce[i]<<"*x "<<((ce[i+1]<0.)?" ":"+")<<ce[i+1]<<"*y "<< ((ce[i+2]<0.)?" ":"+")<<ce[i+2]<<" == 0"
+    if(q.isQuadratic() && ce[i]>=0.) os<<"+";
+        os<<ce[i]<<"*x "<<((ce[i+1]>=0.)?"+":" ")<<ce[i+1]<<"*y "<< ((ce[i+2]>=0.)?"+":" ")<<ce[i+2]<<" == 0"
                                                                               <<std::endl;
     return os;
 }
