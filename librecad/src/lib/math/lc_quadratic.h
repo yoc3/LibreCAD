@@ -54,7 +54,7 @@ public:
     bool isQuadratic() const {
         return m_bIsQuadratic;
     }
-    bool isValid()
+    bool isValid() const
     {
             return m_bValid;
     }
@@ -65,6 +65,8 @@ public:
     static boost::numeric::ublas::matrix<double> rotationMatrix(const double& angle);
 
     static RS_VectorSolutions getIntersection(const LC_Quadratic& l1, const LC_Quadratic& l2);
+
+    friend std::ostream& operator << (std::ostream& os, const LC_Quadratic& l);
 
 //    private:
     boost::numeric::ublas::matrix<double> m_mQuad;

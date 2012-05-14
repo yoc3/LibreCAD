@@ -71,6 +71,7 @@ LC_Quadratic::LC_Quadratic(std::vector<double> ce):
 std::vector<double>  LC_Quadratic::getCoefficients() const
 {
     std::vector<double> ret(0,0.);
+    if(isValid()==false) return ret;
     if(m_bIsQuadratic){
         ret.push_back(m_mQuad(0,0));
         ret.push_back(m_mQuad(0,1)+m_mQuad(1,0));
@@ -153,6 +154,7 @@ RS_VectorSolutions LC_Quadratic::getIntersection(const LC_Quadratic& l1, const L
     }
     if(p2->isQuadratic()==false){
         //one line, one quadratic
+        std::cout<<"linear-quadratic begin"<<std::endl;
         if(fabs(p2->m_vLinear(0))<fabs(p2->m_vLinear(1))){
             return getIntersection(p1->flipXY(),p2->flipXY()).flipXY();
         }
@@ -164,8 +166,12 @@ RS_VectorSolutions LC_Quadratic::getIntersection(const LC_Quadratic& l1, const L
 
     if(p2->isQuadratic()){
         //both quadratic
+        std::cout<<"quadratic-quadratic solver"<<std::endl;
+        std::cout<<*p1<<std::endl;
+        std::cout<<*p2<<std::endl;
         return RS_Math::simultaneousQuadraticSolverFull(ce);
     }else{
+        std::cout<<"linear-quadratic solver"<<std::endl;
         return RS_Math::simultaneousQuadraticSolverMixed(ce);
     }
 }
@@ -184,5 +190,27 @@ boost::numeric::ublas::matrix<double>  LC_Quadratic::rotationMatrix(const double
     ret(0,1)=-ret(1,0);
     ret(1,1)=ret(0,0);
     return ret;
+}
+
+
+/**
+ * Dumps the point's data to stdout.
+ */
+std::ostream& operator << (std::ostream& os, const LC_Quadratic& q) {
+
+    os << " quadratic form: ";
+    if(q.isValid()==false) {
+        os<<" invalid quadratic form"<<std::endl;
+        return os;
+    }
+    auto&& ce=q.getCoefficients();
+    unsigned short i=0;
+    if(ce.size()==6){
+        os<<ce[0]<<"*x^2 "<<( (ce[1]<0.)?" ":"+")<<ce[1]<<"*x*y  "<< ((ce[2]<0.)?" ":"+")<<ce[2]<<" y^2 ";
+        i=3;
+    }
+        os<<((ce[i]<0)?" ":"+")<<"*x "<<((ce[i+1]<0.)?" ":"+")<<ce[i+1]<<"*y "<< ((ce[i+2]<0.)?" ":"+")<<ce[i+2]<<" = 0"
+                                                                              <<std::endl;
+    return os;
 }
 //EOF
