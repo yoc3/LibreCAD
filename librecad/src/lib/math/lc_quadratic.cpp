@@ -26,6 +26,7 @@
 
 #include "rs_math.h"
 #include "lc_quadratic.h"
+#include "rs_debug.h"
 
 #ifdef EMU_C99
 #include "emu_c99.h" /* C99 math */
@@ -164,6 +165,9 @@ RS_VectorSolutions LC_Quadratic::getIntersection(const LC_Quadratic& l1, const L
     std::vector<std::vector<double> >  ce(0);
     ce.push_back(p1->getCoefficients());
     ce.push_back(p2->getCoefficients());
+DEBUG_HEADER();
+std::cout<<*p1<<std::endl;
+std::cout<<*p2<<std::endl;
     return RS_Math::simultaneousQuadraticSolverFull(ce);
 
 }
