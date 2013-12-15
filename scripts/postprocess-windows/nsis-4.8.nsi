@@ -14,7 +14,7 @@
 
   ;Name and file
   Name "LibreCAD"
-  OutFile "LibreCAD-Installer.exe"
+  OutFile "..\..\release\LibreCAD-Installer.exe"
 
   ;Default installation folder
   InstallDir "$PROGRAMFILES\LibreCAD"
