@@ -35,24 +35,12 @@
 #include <cfloat>
 #include <cmath>
 #include <complex>
-#include <errno.h>
 
-// RVT port abs issue on latest compiler?
-#include <cstdlib>
-
-#include <QRegExp>
 #include <QVector>
 
 #include "rs.h"
 #include "rs_vector.h"
 
-
-//#ifdef __GNUC__
-//#define min(x,y) (x<y ? x : y)
-//#define max(x,y) (x>y ? x : y)
-//#endif
-
-#define ARAD 57.29577951308232
 //tolerance
 #define RS_TOLERANCE 1.0e-10
 //squared tolerance
@@ -77,7 +65,8 @@ public:
     static double rad2deg(double a);
     static double deg2rad(double a);
     static double rad2gra(double a);
-    static int findGCD(int a, int b);
+	static double gra2rad(double a);
+	static int findGCD(int a, int b);
     static bool isAngleBetween(double a,
                                double a1, double a2,
                                bool reversed = false);

@@ -24,9 +24,10 @@
 **
 **********************************************************************/
 
-#include "rs_arc.h"
 #include <cmath>
+#include "rs_arc.h"
 
+#include "rs_line.h"
 #include "rs_constructionline.h"
 #include "rs_linetypepattern.h"
 #include "rs_information.h"
@@ -41,6 +42,39 @@
 #include "emu_c99.h"
 #endif
 
+RS_ArcData::RS_ArcData(const RS_Vector& _center,
+					   double _radius,
+					   double _angle1, double _angle2,
+					   bool _reversed):
+	center(_center)
+  ,radius(_radius)
+  ,angle1(_angle1)
+  ,angle2(_angle2)
+  ,reversed(_reversed)
+{
+}
+
+void RS_ArcData::reset() {
+	center = RS_Vector(false);
+	radius = 0.0;
+	angle1 = 0.0;
+	angle2 = 0.0;
+	reversed = false;
+}
+
+bool RS_ArcData::isValid() const{
+	return (center.valid && radius>RS_TOLERANCE &&
+			fabs(remainder(angle1-angle2, 2.*M_PI))>RS_TOLERANCE_ANGLE);
+}
+
+std::ostream& operator << (std::ostream& os, const RS_ArcData& ad) {
+	os << "(" << ad.center <<
+		  "/" << ad.radius <<
+		  " " << ad.angle1 <<
+		  "," << ad.angle2 <<
+		  ")";
+	return os;
+}
 /**
  * Default constructor.
  */
@@ -51,7 +85,11 @@ RS_Arc::RS_Arc(RS_EntityContainer* parent,
     calculateBorders();
 }
 
-
+RS_Entity* RS_Arc::clone() const {
+	RS_Arc* a = new RS_Arc(*this);
+	a->initId();
+	return a;
+}
 
 /**
  * Creates this arc from 3 given points which define the arc line.
@@ -96,7 +134,7 @@ bool RS_Arc::createFrom2PDirectionRadius(const RS_Vector& startPoint,
         double direction1, double radius) {
 
     RS_Vector ortho;
-    ortho.setPolar(radius, direction1 + M_PI/2.0);
+	ortho.setPolar(radius, direction1 + M_PI_2);
     RS_Vector center1 = startPoint + ortho;
     RS_Vector center2 = startPoint - ortho;
 
@@ -135,7 +173,7 @@ bool RS_Arc::createFrom2PDirectionAngle(const RS_Vector& startPoint,
     data.radius=0.5*startPoint.distanceTo(endPoint)/sin(0.5*angleLength);
 
     RS_Vector ortho;
-    ortho.setPolar(data.radius, direction1 + M_PI/2.0);
+	ortho.setPolar(data.radius, direction1 + M_PI_2);
     RS_Vector center1 = startPoint + ortho;
     RS_Vector center2 = startPoint - ortho;
 
@@ -182,9 +220,9 @@ bool RS_Arc::createFrom2PBulge(const RS_Vector& startPoint, const RS_Vector& end
     double angle = startPoint.angleTo(endPoint);
 
     if (bulge>0.0) {
-        angle+=M_PI/2.0;
+		angle+=M_PI_2;
     } else {
-        angle-=M_PI/2.0;
+		angle-=M_PI_2;
     }
 
     if (fabs(alpha)>M_PI) {
@@ -243,10 +281,29 @@ void RS_Arc::calculateBorders() {
 
 
 RS_VectorSolutions RS_Arc::getRefPoints() {
-    RS_VectorSolutions ret(startpoint, endpoint, data.center);
-    return ret;
+	return RS_VectorSolutions({startpoint, endpoint, data.center});
 }
 
+double RS_Arc::getDirection1() const {
+	if (!data.reversed) {
+		return RS_Math::correctAngle(data.angle1+M_PI_2);
+	}
+	else {
+		return RS_Math::correctAngle(data.angle1-M_PI_2);
+	}
+}
+/**
+ * @return Direction 2. The angle at which the arc starts at
+ * the endpoint.
+ */
+double RS_Arc::getDirection2() const {
+	if (!data.reversed) {
+		return RS_Math::correctAngle(data.angle2-M_PI_2);
+	}
+	else {
+		return RS_Math::correctAngle(data.angle2+M_PI_2);
+	}
+}
 
 RS_Vector RS_Arc::getNearestEndpoint(const RS_Vector& coord, double* dist) const{
     double dist1, dist2;
@@ -499,7 +556,7 @@ void RS_Arc::moveStartpoint(const RS_Vector& pos) {
     // polyline arcs: move point not angle:
     //if (parent!=NULL && parent->rtti()==RS2::EntityPolyline) {
     double bulge = getBulge();
-    if(fabs(bulge - M_PI/2.)<RS_TOLERANCE_ANGLE) return;
+	if(fabs(bulge - M_PI_2)<RS_TOLERANCE_ANGLE) return;
 
     createFrom2PBulge(pos, getEndpoint(), bulge);
     correctAngles(); // make sure angleLength is no more than 2*M_PI
@@ -632,7 +689,7 @@ RS_Vector RS_Arc::prepareTrim(const RS_Vector& trimCoord,
         QList<double> ias;
         double ia(0.),ia2(0.);
         RS_Vector is,is2;
-        for(int ii=0; ii<trimSol.getNumber(); ii++) { //find closest according ellipse angle
+		for(size_t ii=0; ii<trimSol.getNumber(); ++ii) { //find closest according ellipse angle
             ias.append(getArcAngle(trimSol.get(ii)));
             if( !ii ||  fabs( remainder( ias[ii] - am, 2*M_PI)) < fabs( remainder( ia -am, 2*M_PI)) ) {
                 ia = ias[ii];
@@ -640,7 +697,7 @@ RS_Vector RS_Arc::prepareTrim(const RS_Vector& trimCoord,
             }
         }
         std::sort(ias.begin(),ias.end());
-        for(int ii=0; ii<trimSol.getNumber(); ii++) { //find segment to enclude trimCoord
+		for(size_t ii=0; ii<trimSol.getNumber(); ++ii) { //find segment to enclude trimCoord
             if ( ! RS_Math::isSameDirection(ia,ias[ii],RS_TOLERANCE)) continue;
             if( RS_Math::isAngleBetween(am,ias[(ii+trimSol.getNumber()-1)% trimSol.getNumber()],ia,false))  {
                 ia2=ias[(ii+trimSol.getNumber()-1)% trimSol.getNumber()];
@@ -649,9 +706,9 @@ RS_Vector RS_Arc::prepareTrim(const RS_Vector& trimCoord,
             }
             break;
         }
-        for(int ii=0; ii<trimSol.getNumber(); ii++) { //find segment to enclude trimCoord
-            if ( ! RS_Math::isSameDirection(ia2,getArcAngle(trimSol.get(ii)),RS_TOLERANCE)) continue;
-            is2=trimSol.get(ii);
+		for(const RS_Vector& vp: trimSol) { //find segment to enclude trimCoord
+			if ( ! RS_Math::isSameDirection(ia2,getArcAngle(vp),RS_TOLERANCE)) continue;
+			is2=vp;
             break;
         }
 //        if(RS_Math::isSameDirection(getAngle1(),getAngle2(),RS_TOLERANCE_ANGLE)
@@ -861,7 +918,7 @@ void RS_Arc::draw(RS_Painter* painter, RS_GraphicView* view,
                     &line,
                     true);
         if( vpIts.size()==0) continue;
-        foreach(RS_Vector vp, vpIts.getVector()){
+		for(const RS_Vector& vp: vpIts){
             auto&& ap1=getTangentDirection(vp).angle();
             auto&& ap2=line.getTangentDirection(vp).angle();
             //ignore tangent points, because the arc doesn't cross over

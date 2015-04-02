@@ -102,6 +102,10 @@
 #include "doc_plugin_interface.h"
 #include "qc_plugininterface.h"
 #include "rs_commands.h"
+#include "rs_arc.h"
+#include "rs_ellipse.h"
+#include "rs_line.h"
+#include "rs_point.h"
 
 
 QC_ApplicationWindow* QC_ApplicationWindow::appWindow = NULL;
@@ -253,18 +257,26 @@ void QC_ApplicationWindow::loadPlugins() {
 
     loadedPlugins.clear();
     QStringList lst = RS_SYSTEM->getDirectoryList("plugins");
+    // Keep track of plugin filenames loaded to skip duplicate plugins.
+    QStringList loadedPluginFileNames;
 
     for (int i = 0; i < lst.size(); ++i) {
         QDir pluginsDir(lst.at(i));
-        foreach (QString fileName, pluginsDir.entryList(QDir::Files)) {
+		for(const QString& fileName: pluginsDir.entryList(QDir::Files)) {
+            // Skip loading a plugin if a plugin with the same
+            // filename has already been loaded.
+            if (loadedPluginFileNames.contains(fileName)) {
+                continue;
+            }
             QPluginLoader pluginLoader(pluginsDir.absoluteFilePath(fileName));
             QObject *plugin = pluginLoader.instance();
             if (plugin) {
                 QC_PluginInterface *pluginInterface = qobject_cast<QC_PluginInterface *>(plugin);
                 if (pluginInterface) {
                     loadedPlugins.append(pluginInterface);
+                    loadedPluginFileNames.append(fileName);
                     PluginCapabilities pluginCapabilities=pluginInterface->getCapabilities();
-                    foreach (PluginMenuLocation loc,  pluginCapabilities.menuEntryPoints) {
+					for(const PluginMenuLocation& loc: pluginCapabilities.menuEntryPoints) {
                         QAction *actpl = new QAction(loc.menuEntryActionName, plugin);
                         actpl->setData(loc.menuEntryActionName);
                         connect(actpl, SIGNAL(triggered()), this, SLOT(execPlug()));
@@ -565,7 +577,7 @@ void QC_ApplicationWindow::initMDI() {
     RS_DEBUG->print("QC_ApplicationWindow::initMDI() begin");
 
     QFrame *vb = new QFrame(this);
-    vb->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::MinimumExpanding);
+	vb->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
     QVBoxLayout *layout = new QVBoxLayout;
     vb->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     layout->setContentsMargins ( 0, 0, 0, 0 );
@@ -577,7 +589,7 @@ void QC_ApplicationWindow::initMDI() {
     mdiAreaCAD->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     mdiAreaCAD->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     mdiAreaCAD->setFocusPolicy(Qt::ClickFocus);
-    mdiAreaCAD->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::MinimumExpanding);
+	mdiAreaCAD->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 #if QT_VERSION >= 0x040800
     mdiAreaCAD->setTabsClosable(true);
 #endif
@@ -591,7 +603,7 @@ void QC_ApplicationWindow::initMDI() {
     // Since this nice feature causes a bug of lost key events when the command widget is on
     // a screen different from the main window, disabled for the time being
     //send key events for mdiAreaCAD to command widget by default
-//    mdiAreaCAD->installEventFilter(commandWidget);
+	mdiAreaCAD->installEventFilter(commandWidget);
 
     RS_DEBUG->print("QC_ApplicationWindow::initMDI() end");
 
@@ -1247,7 +1259,7 @@ void QC_ApplicationWindow::initToolBar() {
     QToolBar* t = new QToolBar(tr("CAD Tools"), this);
 
     t->setMinimumSize(66,400);
-        QSizePolicy policy(QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
+		QSizePolicy policy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         t->setSizePolicy(policy);
         t->setObjectName ( "CADTB" );
     t->setFixedWidth(66);
@@ -1422,6 +1434,7 @@ void QC_ApplicationWindow::initView() {
 
     RS_DEBUG->print("  block widget..");
     dw = new QDockWidget("Block", this);
+	dw->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
         dw->setObjectName ( "BlockDW" );
     // dw->setResizeEnabled(true);
     blockWidget = new QG_BlockWidget(actionHandler, dw, "Block");
@@ -1441,7 +1454,9 @@ void QC_ApplicationWindow::initView() {
 
     RS_DEBUG->print("  library widget..");
     dw = new QDockWidget("Library", this);
-        dw->setObjectName ( "LibraryDW" );
+	dw->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+		dw->setObjectName ( "BlockDW" );
+		dw->setObjectName ( "LibraryDW" );
     libraryWidget = new QG_LibraryWidget(dw, "Library");
     libraryWidget->setActionHandler(actionHandler);
     libraryWidget->setFocusPolicy(Qt::NoFocus);
@@ -1464,7 +1479,9 @@ void QC_ApplicationWindow::initView() {
 
     RS_DEBUG->print("  command widget..");
     dw = new QDockWidget(tr("Command line"), this);
-    dw->setFeatures(QDockWidget::DockWidgetVerticalTitleBar|QDockWidget::AllDockWidgetFeatures);
+	dw->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+		dw->setObjectName ( "BlockDW" );
+	dw->setFeatures(QDockWidget::DockWidgetVerticalTitleBar|QDockWidget::AllDockWidgetFeatures);
     dw->setObjectName ( "CommandDW" );
     // dw->setResizeEnabled(true);
     commandWidget = new QG_CommandWidget(dw, "Command");
@@ -2675,7 +2692,7 @@ void QC_ApplicationWindow::slotFileExport() {
     #if QT_VERSION >= 0x040300
         supportedImageFormats.append("svg"); // add svg
     #endif
-        foreach (QString format, supportedImageFormats) {
+		for (QString format: supportedImageFormats) {
             format = format.toLower();
             QString st;
             if (format=="jpeg" || format=="tiff") {
@@ -3519,7 +3536,7 @@ void QC_ApplicationWindow::slotHelpAbout() {
     /**
       * Show all plugin that has been loaded
       */
-    foreach (QC_PluginInterface *pluginInterface, loadedPlugins)
+	for (QC_PluginInterface * const pluginInterface: loadedPlugins)
         modules.append(pluginInterface->name());
 
     QString modulesString=tr("None");
@@ -4068,7 +4085,7 @@ void QC_ApplicationWindow::slotTestInsertBlock() {
 
         // Add one arc with attributes from block:
         RS_ArcData d(RS_Vector(50.0,0.0),
-                     50.0, M_PI/2.0, M_PI,
+					 50.0, M_PI_2, M_PI,
                      false);
         arc = new RS_Arc(block, d);
         arc->setPen(RS_Pen(RS_Color(RS2::FlagByBlock),
@@ -4110,7 +4127,7 @@ void QC_ApplicationWindow::slotTestInsertBlock() {
         // insert one green instance of the block (rotate):
         insData = RS_InsertData("debugblock",
                                 RS_Vector(-50.0,20.0),
-                                RS_Vector(1.0,1.0), 30.0/ARAD,
+								RS_Vector(1.0,1.0), M_PI/6.,
                                 1, 1, RS_Vector(0.0, 0.0),
                                 NULL, RS2::NoUpdate);
         ins = new RS_Insert(graphic, insData);
@@ -4139,7 +4156,7 @@ void QC_ApplicationWindow::slotTestInsertBlock() {
         for (double a=0.0; a<360.0; a+=45.0) {
             insData = RS_InsertData("debugblock",
                                     RS_Vector(60.0,0.0),
-                                    RS_Vector(2.0/5,2.0/5), a/ARAD,
+									RS_Vector(2.0/5,2.0/5), RS_Math::deg2rad(a),
                                     1, 1, RS_Vector(0.0, 0.0),
                                     NULL, RS2::NoUpdate);
             ins = new RS_Insert(graphic, insData);
@@ -4598,8 +4615,8 @@ void QC_ApplicationWindow::slotTestMath01() {
 
         // cos
         double a;
-        double x = 59.0/ARAD;
-        double x_0 = 60.0/ARAD;
+		double x = RS_Math::deg2rad(59.0);
+		double x_0 = RS_Math::deg2rad(60.0);
         for (a=0.01; a<2*M_PI; a+=0.01) {
             // cos curve:
             RS_Line* line = new RS_Line(graphic,

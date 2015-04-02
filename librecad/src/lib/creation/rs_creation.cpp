@@ -27,13 +27,21 @@
 
 #include <QFileInfo>
 #include "rs_creation.h"
-
-#include "rs_information.h"
-#include "rs_graphic.h"
+#include "rs_document.h"
 #include "rs_constructionline.h"
 #include "rs_graphicview.h"
-#include "rs_modification.h"
+#include "rs_graphic.h"
+#include "rs_arc.h"
+#include "rs_block.h"
+#include "rs_line.h"
+#include "rs_circle.h"
+#include "rs_ellipse.h"
+#include "rs_insert.h"
+#include "rs_image.h"
 #include "lc_hyperbola.h"
+#include "lc_splinepoints.h"
+#include "rs_modification.h"
+#include "rs_information.h"
 
 /**
  * Default constructor.
@@ -247,7 +255,7 @@ RS_Line* RS_Creation::createParallelLine(const RS_Vector& coord,
         return NULL;
     }
 
-    double ang = e->getAngle1() + M_PI/2.0;
+	double ang = e->getAngle1() + M_PI_2;
     RS_Vector p1, p2;
     RS_LineData parallelData;
     RS_Line* ret = NULL;
@@ -363,7 +371,7 @@ RS_Arc* RS_Creation::createParallelArc(const RS_Vector& coord,
         //double minDist = min(dist1, dist2);
 
         //if (minDist<RS_MAXDOUBLE) {
-        if (ok==true) {
+		if (ok) {
             //if (dist1<dist2) {
             parallelData = parallel1.getData();
             //} else {
@@ -449,7 +457,7 @@ RS_Circle* RS_Creation::createParallelCircle(const RS_Vector& coord,
         //double minDist = min(dist1, dist2);
 
         //if (minDist<RS_MAXDOUBLE) {
-        if (ok==true) {
+		if (ok) {
             //if (dist1<dist2) {
             parallelData = parallel1.getData();
             //} else {
@@ -787,8 +795,8 @@ RS_Line* RS_Creation::createTangent2(const RS_Vector& coord,
             double dist2 = circleRadius2 - circleRadius1;
             if (dist1>dist2) {
                 double angle2 = asin(dist2/dist1);
-                double angt1 = angle1 + angle2 + M_PI/2.0;
-                double angt2 = angle1 - angle2 - M_PI/2.0;
+				double angt1 = angle1 + angle2 + M_PI_2;
+				double angt2 = angle1 - angle2 - M_PI_2;
                 RS_Vector offs1;
                 RS_Vector offs2;
 
@@ -812,8 +820,8 @@ RS_Line* RS_Creation::createTangent2(const RS_Vector& coord,
             double dist3 = circleRadius2 + circleRadius1;
             if (dist1>dist3) {
                 double angle3 = asin(dist3/dist1);
-                double angt3 = angle1 + angle3 + M_PI/2.0;
-                double angt4 = angle1 - angle3 - M_PI/2.0;
+				double angt3 = angle1 + angle3 + M_PI_2;
+				double angt4 = angle1 - angle3 - M_PI_2;
                 RS_Vector offs1;
                 RS_Vector offs2;
 
@@ -836,7 +844,7 @@ RS_Line* RS_Creation::createTangent2(const RS_Vector& coord,
         }
     }else{
         //circle2 is Ellipse
-        RS_Ellipse* e2=(RS_Ellipse*)circle2->clone();
+		std::unique_ptr<RS_Ellipse> e2((RS_Ellipse*)circle2->clone());
 //        RS_Ellipse* e2=new RS_Ellipse(NULL,RS_EllipseData(RS_Vector(4.,1.),RS_Vector(2.,0.),0.5,0.,0.,false));
 //        RS_Ellipse  e3(NULL,RS_EllipseData(RS_Vector(4.,1.),RS_Vector(2.,0.),0.5,0.,0.,false));
 //        RS_Ellipse* circle1=new RS_Ellipse(NULL,RS_EllipseData(RS_Vector(0.,0.),RS_Vector(1.,0.),1.,0.,0.,false));
@@ -884,10 +892,8 @@ RS_Line* RS_Creation::createTangent2(const RS_Vector& coord,
 
         auto&& vs0=RS_Math::simultaneousQuadraticSolver(m); //to hold solutions
         if (vs0.getNumber()<1) return NULL;
-        for(int i=0;i<vs0.getNumber();i++){
-//            std::cout<<"i="<<i<<"\n";
-            RS_Vector vpec=vs0.get(i); //this holds ( a*sin(t), b*cos(t))
-//            std::cout<<"solution "<<i<<" ="<<vpec<<std::endl;
+//        for(size_t i=0;i<vs0.getNumber();i++){
+		for(RS_Vector vpec: vs0){
             RS_Vector vpe2(e2->getCenter()+ RS_Vector(vpec.y/e2->getRatio(),vpec.x*e2->getRatio()));
             vpec.x *= -1.;//direction vector of tangent
             RS_Vector vpe1(vpe2 - vpec*(RS_Vector::dotP(vpec,vpe2)/vpec.squared()));
@@ -900,7 +906,6 @@ RS_Line* RS_Creation::createTangent2(const RS_Vector& coord,
             poss.push_back(l);
 
         }
-        delete e2;
         //debugging
 
     }
@@ -1021,7 +1026,7 @@ RS_Line* RS_Creation::createLineRelAngle(const RS_Vector& coord,
         a1 = ((RS_Line*)entity)->getAngle1();
         break;
     case RS2::EntityArc:
-        a1 = ((RS_Arc*)entity)->getCenter().angleTo(coord) + M_PI/2.0;
+		a1 = ((RS_Arc*)entity)->getCenter().angleTo(coord) + M_PI_2;
         break;
     case RS2::EntityCircle:
         a1 = ((RS_Circle*)entity)->getCenter().angleTo(coord);
@@ -1191,7 +1196,7 @@ RS_Line* RS_Creation::createPolygon2(const RS_Vector& corner1,
      *
      * @param data Insert data (position, block name, ..)
      */
-RS_Insert* RS_Creation::createInsert(RS_InsertData& data) {
+RS_Insert* RS_Creation::createInsert(const RS_InsertData* pdata) {
 
     RS_DEBUG->print("RS_Creation::createInsert");
 
@@ -1199,7 +1204,7 @@ RS_Insert* RS_Creation::createInsert(RS_InsertData& data) {
         document->startUndoCycle();
     }
 
-    RS_Insert* ins = new RS_Insert(container, data);
+	RS_Insert* ins = new RS_Insert(container, *pdata);
     // inserts are also on layers
     ins->setLayerToActive();
     ins->setPenToActive();
@@ -1225,13 +1230,13 @@ RS_Insert* RS_Creation::createInsert(RS_InsertData& data) {
 /**
      * Creates an image with the given data.
      */
-RS_Image* RS_Creation::createImage(RS_ImageData& data) {
+RS_Image* RS_Creation::createImage(const RS_ImageData* data) {
 
     if (document!=NULL && handleUndo) {
         document->startUndoCycle();
     }
 
-    RS_Image* img = new RS_Image(container, data);
+	RS_Image* img = new RS_Image(container, *data);
     img->setLayerToActive();
     img->setPenToActive();
     img->update();
@@ -1258,7 +1263,7 @@ RS_Image* RS_Creation::createImage(RS_ImageData& data) {
      * @param name Block name
      * @param remove true: remove existing entities, false: don't touch entities
      */
-RS_Block* RS_Creation::createBlock(const RS_BlockData& data,
+RS_Block* RS_Creation::createBlock(const RS_BlockData* data,
                                    const RS_Vector& referencePoint,
                                    const bool remove) {
 
@@ -1269,7 +1274,7 @@ RS_Block* RS_Creation::createBlock(const RS_BlockData& data,
 
     RS_Block* block =
             new RS_Block(container,
-                         RS_BlockData(data.name, data.basePoint, data.frozen));
+						 RS_BlockData(*data));
 
     // copy entities into a block
     for (RS_Entity* e=container->firstEntity();

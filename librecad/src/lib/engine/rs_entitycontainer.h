@@ -28,12 +28,8 @@
 #ifndef RS_ENTITYCONTAINER_H
 #define RS_ENTITYCONTAINER_H
 
-#include "rs_arc.h"
-#include "rs_circle.h"
-#include "rs_ellipse.h"
+#include <vector>
 #include "rs_entity.h"
-#include "rs_line.h"
-#include "rs_point.h"
 
 /**
  * Class representing a tree of entities.
@@ -45,11 +41,11 @@ class RS_EntityContainer : public RS_Entity {
 
 public:
 
-    RS_EntityContainer(RS_EntityContainer* parent=NULL, bool owner=true);
+	RS_EntityContainer(RS_EntityContainer* parent=NULL, bool owner=true);
     //RS_EntityContainer(const RS_EntityContainer& ec);
     virtual ~RS_EntityContainer();
 
-    virtual RS_Entity* clone();
+	virtual RS_Entity* clone() const;
     virtual void detach();
 
     /** @return RS2::EntityContainer */
@@ -98,17 +94,10 @@ public:
     virtual RS_Entity* nextEntity(RS2::ResolveLevel level=RS2::ResolveNone);
     virtual RS_Entity* prevEntity(RS2::ResolveLevel level=RS2::ResolveNone);
     virtual RS_Entity* entityAt(int index);
-    virtual void setEntityAt(int index,RS_Entity* en){
-        if(autoDelete && entities.at(index) != NULL) {
-            delete entities.at(index);
-        }
-        entities[index] = en;
-    }
+	virtual void setEntityAt(int index,RS_Entity* en);
 //RLZ unused	virtual int entityAt();
         virtual int findEntity(RS_Entity* entity);
     virtual void clear();
-
-    QListIterator<RS_Entity*> createIterator();
 
     //virtual unsigned long int count() {
         //	return count(false);
@@ -198,7 +187,7 @@ public:
 
     friend std::ostream& operator << (std::ostream& os, RS_EntityContainer& ec);
 
-    bool isOwner() {return autoDelete;}
+	bool isOwner() const {return autoDelete;}
     void setOwner(bool owner) {autoDelete=owner;}
     /**
      * @brief areaLineIntegral, line integral for contour area calculation by Green's Theorem
@@ -213,6 +202,12 @@ public:
      * @return, true, indicate this entity container should be ignored
      */
     bool ignoredOnModification() const;
+	/**
+	 * @brief begin/end to support range based loop
+	 * @return iterator
+	 */
+	QList<RS_Entity *>::const_iterator begin() const;
+	QList<RS_Entity *>::const_iterator end() const;
 
 protected:
 

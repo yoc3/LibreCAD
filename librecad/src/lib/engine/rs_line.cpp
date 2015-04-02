@@ -26,7 +26,6 @@
 **********************************************************************/
 
 
-#include <QtGui>
 #include "rs_line.h"
 
 #include "rs_debug.h"
@@ -37,11 +36,25 @@
 #include "rs_information.h"
 #include "lc_quadratic.h"
 #include "rs_painterqt.h"
-
+#include "rs_circle.h"
 
 #ifdef EMU_C99
 #include "emu_c99.h"
 #endif
+
+RS_LineData::RS_LineData(const RS_Vector& _startpoint,
+			const RS_Vector& _endpoint):
+	startpoint(_startpoint)
+	,endpoint(_endpoint)
+{
+}
+
+std::ostream& operator << (std::ostream& os, const RS_LineData& ld) {
+	os << "(" << ld.startpoint <<
+		  "/" << ld.endpoint <<
+		  ")";
+	return os;
+}
 
 /**
  * Constructor.
@@ -65,18 +78,10 @@ RS_Line::RS_Line(const RS_Vector& pStart, const RS_Vector& pEnd)
 }
 
 
-/**
- * Destructor.
- */
-RS_Line::~RS_Line() {}
-
-
-
-
-RS_Entity* RS_Line::clone() {
-    RS_Line* l = new RS_Line(*this);
-    l->initId();
-    return l;
+RS_Entity* RS_Line::clone() const {
+	RS_Line* l = new RS_Line(*this);
+	l->initId();
+	return l;
 }
 
 
@@ -89,8 +94,7 @@ void RS_Line::calculateBorders() {
 
 
 RS_VectorSolutions RS_Line::getRefPoints() {
-    RS_VectorSolutions ret(data.startpoint, data.endpoint);
-    return ret;
+	return RS_VectorSolutions({data.startpoint, data.endpoint});
 }
 
 
@@ -371,7 +375,7 @@ bool RS_Line::offset(const RS_Vector& coord, const double& distance) {
     if(ds< RS_TOLERANCE) return false;
     direction /= ds;
     RS_Vector vp(coord-getStartpoint());
-    RS_Vector vp1(getStartpoint() + direction*(RS_Vector::dotP(direction,vp))); //projection
+//    RS_Vector vp1(getStartpoint() + direction*(RS_Vector::dotP(direction,vp))); //projection
     direction.set(-direction.y,direction.x); //rotate pi/2
     if(RS_Vector::dotP(direction,vp)<0.) {
         direction *= -1.;
@@ -383,8 +387,8 @@ bool RS_Line::offset(const RS_Vector& coord, const double& distance) {
 
 bool RS_Line::isTangent(const RS_CircleData&  circleData){
     double d;
-    getNearestPointOnEntity(circleData.center,false,&d);
-    if(fabs(d-circleData.radius)<20.*RS_TOLERANCE) return true;
+	getNearestPointOnEntity(circleData.center,false,&d);
+	if(fabs(d-circleData.radius)<20.*RS_TOLERANCE) return true;
     return false;
 }
 

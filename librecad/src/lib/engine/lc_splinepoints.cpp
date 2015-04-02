@@ -24,12 +24,26 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "lc_splinepoints.h"
 
+#include "rs_circle.h"
 #include "rs_debug.h"
+#include "rs_line.h"
 #include "rs_graphicview.h"
 #include "rs_painter.h"
 #include "rs_graphic.h"
 #include "rs_painterqt.h"
 #include "lc_quadratic.h"
+
+LC_SplinePointsData::LC_SplinePointsData(bool _closed, bool _cut):
+	closed(_closed)
+  ,cut(_cut)
+{
+}
+
+std::ostream& operator << (std::ostream& os, const LC_SplinePointsData& ld)
+{
+	os << "( closed: " << ld.closed << ")";
+	return os;
+}
 
 RS_Vector GetQuadPoint(const RS_Vector& x1,
 	const RS_Vector& c1, const RS_Vector& x2, double dt)
@@ -265,19 +279,14 @@ RS_Vector GetThreePointsControl(const RS_Vector& x1, const RS_Vector& x2, const 
  * Constructor.
  */
 LC_SplinePoints::LC_SplinePoints(RS_EntityContainer* parent,
-    const LC_SplinePointsData& d) : RS_AtomicEntity(parent), data(d)
+								 const LC_SplinePointsData& d) :
+	RS_AtomicEntity(parent)
+  ,data(d)
 {
 	calculateBorders();
 }
 
-/**
- * Destructor.
- */
-LC_SplinePoints::~LC_SplinePoints()
-{
-}
-
-RS_Entity* LC_SplinePoints::clone()
+RS_Entity* LC_SplinePoints::clone() const
 {
     LC_SplinePoints* l = new LC_SplinePoints(*this);
 	l->initId();
@@ -407,17 +416,9 @@ RS_VectorSolutions LC_SplinePoints::getRefPoints()
 
 	if(data.cut)
 	{
-		for(int i = 0; i < data.controlPoints.count(); i++)
-		{
-			ret.push_back(data.controlPoints.at(i));
-		}
-	}
-	else
-	{
-		for(int i = 0; i < data.splinePoints.count(); i++)
-		{
-			ret.push_back(data.splinePoints.at(i));
-		}
+		std::copy(data.controlPoints.begin(), data.controlPoints.end(), ret.begin());
+	} else {
+		std::copy(data.splinePoints.begin(), data.splinePoints.end(), ret.begin());
 	}
 
 	return ret;
@@ -3175,7 +3176,7 @@ void addQuadQuadIntersect(RS_VectorSolutions *pVS,
 
     RS_VectorSolutions&& pvRes = RS_Math::simultaneousQuadraticSolverFull(m);
 
-    for(RS_Vector& vSol: pvRes.getVector())
+	for(RS_Vector vSol: pvRes)
     {
 		if(vSol.x > -RS_TOLERANCE && vSol.x < 1.0 + RS_TOLERANCE &&
 			vSol.y > -RS_TOLERANCE && vSol.y < 1.0 + RS_TOLERANCE)

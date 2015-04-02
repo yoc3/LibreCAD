@@ -27,10 +27,37 @@
 
 #include "rs_insert.h"
 
+#include "rs_arc.h"
+#include "rs_circle.h"
+#include "rs_ellipse.h"
 #include "rs_block.h"
 #include "rs_graphic.h"
 #include "rs_layer.h"
 
+RS_InsertData::RS_InsertData(const QString& _name,
+							 RS_Vector _insertionPoint,
+							 RS_Vector _scaleFactor,
+							 double _angle,
+							 int _cols, int _rows, RS_Vector _spacing,
+							 RS_BlockList* _blockSource ,
+							 RS2::UpdateMode _updateMode ):
+	name(_name)
+  ,insertionPoint(_insertionPoint)
+  ,scaleFactor(_scaleFactor)
+  ,angle(_angle)
+  ,cols(_cols)
+  ,rows(_rows)
+  ,spacing(_spacing)
+  ,blockSource(_blockSource)
+  ,updateMode(_updateMode)
+{
+}
+
+std::ostream& operator << (std::ostream& os,
+									 const RS_InsertData& d) {
+	   os << "(" << d.name.toLatin1().data() << ")";
+	   return os;
+   }
 /**
  * @param parent The graphic this block belongs to.
  */
@@ -47,10 +74,13 @@ RS_Insert::RS_Insert(RS_EntityContainer* parent,
 }
 
 
-/**
- * Destructor.
- */
-RS_Insert::~RS_Insert() {}
+RS_Entity* RS_Insert::clone() const{
+	RS_Insert* i = new RS_Insert(*this);
+	i->setOwner(isOwner());
+	i->initId();
+	i->detach();
+	return i;
+}
 
 
 /**
@@ -273,7 +303,7 @@ bool RS_Insert::isVisible() {
 
 
 RS_VectorSolutions RS_Insert::getRefPoints() {
-        RS_VectorSolutions ret(data.insertionPoint);
+		RS_VectorSolutions ret{data.insertionPoint};
         return ret;
 }
 

@@ -29,9 +29,6 @@
 #ifndef RS_ENTITY_H
 #define RS_ENTITY_H
 
-#include <memory>
-#include <QMultiHash>
-
 #include "rs_math.h"
 #include "rs_pen.h"
 #include "rs_undoable.h"
@@ -63,14 +60,14 @@ class RS_GraphicView;
 class RS_Entity : public RS_Undoable {
 public:
 
-
+	RS_Entity()=default;
     RS_Entity(RS_EntityContainer* parent=NULL);
-    virtual ~RS_Entity();
+	virtual ~RS_Entity() = default;
 
     void init();
     virtual void initId();
 
-    virtual RS_Entity* clone() = 0;
+	virtual RS_Entity* clone() const = 0;
 
     virtual void reparent(RS_EntityContainer* parent) {
         this->parent = parent;
@@ -597,7 +594,7 @@ m0 x + m1 y + m2 =0
 
 protected:
     //! Entity's parent entity or NULL is this entity has no parent.
-    RS_EntityContainer* parent;
+	RS_EntityContainer* parent = nullptr;
     //! minimum coordinates
     RS_Vector minV;
     //! maximum coordinates

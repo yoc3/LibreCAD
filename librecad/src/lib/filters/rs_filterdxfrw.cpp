@@ -24,28 +24,35 @@
 **********************************************************************/
 
 
+#include <QStringList>
+#include <QTextCodec>
+
 #include "rs_filterdxfrw.h"
 
-#include <stdio.h>
-
+#include "rs_arc.h"
+#include "rs_circle.h"
 #include "rs_dimaligned.h"
 #include "rs_dimangular.h"
 #include "rs_dimdiametric.h"
 #include "rs_dimlinear.h"
 #include "rs_dimradial.h"
+#include "rs_ellipse.h"
 #include "rs_hatch.h"
 #include "rs_image.h"
+#include "rs_insert.h"
+#include "rs_layer.h"
 #include "rs_leader.h"
+#include "rs_line.h"
+#include "rs_mtext.h"
+#include "rs_point.h"
+#include "rs_polyline.h"
+#include "rs_solid.h"
 #include "rs_spline.h"
 #include "lc_splinepoints.h"
 #include "rs_system.h"
+#include "rs_text.h"
 #include "rs_graphicview.h"
-#include "rs_grid.h"
 #include "rs_dialogfactory.h"
-
-#include <QStringList>
-
-#include <qtextcodec.h>
 
 #ifdef DWGSUPPORT
 #include "libdwgr.h"
@@ -973,8 +980,8 @@ void RS_FilterDXFRW::addDimAngular3P(const DRW_DimAngular3p* data) {
     RS_Vector dp1(data->getFirstLine().x, data->getFirstLine().y);
     RS_Vector dp2(data->getSecondLine().x, data->getSecondLine().y);
     RS_Vector dp3(data->getVertexPoint().x, data->getVertexPoint().y);
-    RS_Vector dp4 = dimensionData.definitionPoint;
-    dimensionData.definitionPoint = RS_Vector(data->getVertexPoint().x, data->getVertexPoint().y);
+	RS_Vector dp4 = dimensionData.definitionPoint;
+	dimensionData.definitionPoint = RS_Vector(data->getVertexPoint().x, data->getVertexPoint().y);
 
     RS_DimAngularData d(dp1, dp2, dp3, dp4);
 
@@ -2583,8 +2590,8 @@ void RS_FilterDXFRW::writeDimension(RS_Dimension* d) {
         dd->setLeaderLength(dr->getLeader());
         break; }
     case RS2::EntityDimAngular: {
-        RS_DimAngular* da = (RS_DimAngular*)d;
-        if (da->getDefinitionPoint3() == da->getData().definitionPoint) {
+		RS_DimAngular* da = static_cast<RS_DimAngular*>(d);
+		if (da->getDefinitionPoint3() == da->getData().definitionPoint) {
             DRW_DimAngular3p * dd = new DRW_DimAngular3p();
             dim = dd ;
             dim->type = 5+32;

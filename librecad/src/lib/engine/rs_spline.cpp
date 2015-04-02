@@ -27,10 +27,26 @@
 
 #include "rs_spline.h"
 
+
+#include "rs_line.h"
 #include "rs_debug.h"
 #include "rs_graphicview.h"
 #include "rs_painter.h"
 #include "rs_graphic.h"
+
+
+RS_SplineData::RS_SplineData(int _degree, bool _closed):
+	degree(_degree)
+  ,closed(_closed)
+{
+}
+
+std::ostream& operator << (std::ostream& os, const RS_SplineData& ld) {
+	os << "( degree: " << ld.degree <<
+		  " closed: " << ld.closed <<
+		  ")";
+	return os;
+}
 
 /**
  * Constructor.
@@ -41,17 +57,7 @@ RS_Spline::RS_Spline(RS_EntityContainer* parent,
     calculateBorders();
 }
 
-
-
-/**
- * Destructor.
- */
-RS_Spline::~RS_Spline() {}
-
-
-
-
-RS_Entity* RS_Spline::clone() {
+RS_Entity* RS_Spline::clone() const{
     RS_Spline* l = new RS_Spline(*this);
     l->setOwner(isOwner());
     l->initId();
@@ -79,11 +85,8 @@ void RS_Spline::calculateBorders() {
 
 RS_VectorSolutions RS_Spline::getRefPoints() {
 
-    RS_VectorSolutions ret(data.controlPoints.size());
-
-    for (int i = 0; i < data.controlPoints.size(); ++i) {
-        ret.set(i, data.controlPoints.at(i));
-    }
+	RS_VectorSolutions ret;
+	std::copy(data.controlPoints.begin(), data.controlPoints.end(), ret.begin());
 
     return ret;
 }

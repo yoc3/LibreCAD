@@ -36,9 +36,9 @@
  * Constructor.
  */
 RS_Leader::RS_Leader(RS_EntityContainer* parent)
-        :RS_EntityContainer(parent) {
-
-    empty = true;
+		:RS_EntityContainer(parent)
+		,empty(true)
+{
 }
 
 
@@ -52,14 +52,13 @@ RS_Leader::RS_Leader(RS_EntityContainer* parent,
     empty = true;
 }
 
-
-
-/**
- * Destructor
- */
-RS_Leader::~RS_Leader() {}
-
-
+RS_Entity* RS_Leader::clone() const{
+	RS_Leader* p = new RS_Leader(*this);
+	p->setOwner(isOwner());
+	p->initId();
+	p->detach();
+	return p;
+}
 
 /**
  * Implementation of update. Updates the arrow.

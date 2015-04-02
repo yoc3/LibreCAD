@@ -25,9 +25,14 @@
 **
 **********************************************************************/
 
+#include <vector>
 #include "rs_information.h"
 
+#include "rs_arc.h"
+#include "rs_circle.h"
 #include "rs_constructionline.h"
+#include "rs_ellipse.h"
+#include "rs_line.h"
 #include "lc_quadratic.h"
 #include "lc_splinepoints.h"
 
@@ -260,9 +265,8 @@ RS_VectorSolutions RS_Information::getIntersection(RS_Entity* e1,
 		ret=LC_Quadratic::getIntersection(qf1,qf2);
 	}
     RS_VectorSolutions ret2;
-    for(int i=0;i<ret.getNumber();i++) {
-        RS_Vector&& vp=ret.get(i);
-        if ( ! ret.get(i).valid) continue;
+	for(const RS_Vector& vp: ret){
+		if ( ! vp.valid) continue;
         if (onEntities==true) {
             //ignore intersections not on entity
             if (!(
@@ -332,13 +336,14 @@ RS_VectorSolutions RS_Information::getIntersectionLineLine(RS_Line* e1,
     double num = ((p4.x-p3.x)*(p1.y-p3.y) - (p4.y-p3.y)*(p1.x-p3.x));
     double div = ((p4.y-p3.y)*(p2.x-p1.x) - (p4.x-p3.x)*(p2.y-p1.y));
 
-    if (fabs(div)>RS_TOLERANCE) {
-        double u = num / div;
+	if (fabs(div)>RS_TOLERANCE &&
+			fabs(remainder(e1->getAngle1()-e2->getAngle1(), M_PI))>=RS_TOLERANCE*10.) {
+		double u = num / div;
 
-        double xs = p1.x + u * (p2.x-p1.x);
-        double ys = p1.y + u * (p2.y-p1.y);
-        ret = RS_VectorSolutions(RS_Vector(xs, ys));
-    }
+		double xs = p1.x + u * (p2.x-p1.x);
+		double ys = p1.y + u * (p2.y-p1.y);
+		ret = RS_VectorSolutions({RS_Vector(xs, ys)});
+	}
 
     // lines are parallel
     else {
@@ -368,7 +373,7 @@ RS_VectorSolutions RS_Information::getIntersectionLineArc(RS_Line* line,
 
     // special case: arc touches line (tangent):
     if (nearest.valid && fabs(dist - arc->getRadius()) < 1.0e-4) {
-        ret = RS_VectorSolutions(nearest);
+		ret = RS_VectorSolutions({nearest});
         ret.setTangent(true);
         return ret;
     }
@@ -382,7 +387,7 @@ RS_VectorSolutions RS_Information::getIntersectionLineArc(RS_Line* line,
     if (d2<RS_TOLERANCE2) {
         //line too short, still check the whether the line touches the arc
         if ( fabs(delta.squared() - r*r) < 2.*RS_TOLERANCE*r ){
-            return RS_VectorSolutions(line->getMiddlePoint());
+			return RS_VectorSolutions({line->getMiddlePoint()});
         }
         return ret;
     }
@@ -404,14 +409,14 @@ RS_VectorSolutions RS_Information::getIntersectionLineArc(RS_Line* line,
         if( term1 < RS_TOLERANCE * d2 ) {
             //tangential;
 //            ret=RS_VectorSolutions(p - d*(a1/d2));
-            ret=RS_VectorSolutions(line->getNearestPointOnEntity(c, false));
+			ret=RS_VectorSolutions({line->getNearestPointOnEntity(c, false)});
             ret.setTangent(true);
 //        std::cout<<"Tangential point: "<<ret<<std::endl;
             return ret;
         }
         double t = sqrt(fabs(term1));
     //two intersections
-     return RS_VectorSolutions( p + d*(t-a1)/d2, p -d*(t+a1)/d2);
+	 return RS_VectorSolutions({ p + d*(t-a1)/d2, p -d*(t+a1)/d2});
     }
 
 //    // root term:
@@ -513,10 +518,10 @@ RS_VectorSolutions RS_Information::getIntersectionArcArc(RS_Arc* e1,
 
         if (sol1.distanceTo(sol2)<1.0e-4) {
             sol2 = RS_Vector(false);
-            ret = RS_VectorSolutions(sol1);
+			ret = RS_VectorSolutions({sol1});
             tangent = true;
         } else {
-            ret = RS_VectorSolutions(sol1, sol2);
+			ret = RS_VectorSolutions({sol1, sol2});
         }
 
         ret.setTangent(tangent);
@@ -555,7 +560,7 @@ RS_VectorSolutions RS_Information::getIntersectionEllipseEllipse(RS_Ellipse* e1,
     double shifta1=-e01->getAngle();
     e02->move(shiftc1);
     e02->rotate(shifta1);
-    RS_Vector majorP2=e02->getMajorP();
+//    RS_Vector majorP2=e02->getMajorP();
     double a1=e01->getMajorRadius();
     double b1=e01->getMinorRadius();
     double x2=e02->getCenter().x,
@@ -614,8 +619,7 @@ RS_VectorSolutions RS_Information::getIntersectionEllipseEllipse(RS_Ellipse* e1,
     auto&& vs0=RS_Math::simultaneousQuadraticSolver(m);
     shifta1 = - shifta1;
     shiftc1 = - shiftc1;
-    for(int i=0; i<vs0.getNumber(); i++) {
-        RS_Vector vp=vs0.get(i);
+	for(RS_Vector vp: vs0){
         vp.rotate(shifta1);
         vp.move(shiftc1);
         ret.push_back(vp);
@@ -918,3 +922,80 @@ bool RS_Information::isPointInsideContour(const RS_Vector& point,
     return ((counter%2)==1);
 }
 
+
+RS_VectorSolutions RS_Information::createQuadrilateral(const RS_EntityContainer& container)
+{
+	RS_VectorSolutions ret;
+	if(container.count()!=4) return ret;
+	RS_EntityContainer c(container);
+	std::vector<RS_Line*> lines;
+	for (RS_Entity* e=c.firstEntity(RS2::ResolveNone);
+		 e!=NULL;
+		 e=c.nextEntity(RS2::ResolveNone)) {
+		if(e->rtti()!=RS2::EntityLine) return ret;
+		lines.push_back(static_cast<RS_Line*>(e));
+	}
+	if(lines.size()!=4) return ret;
+
+	//find intersections
+	std::vector<RS_Vector> vertices;
+	for(auto it=lines.begin()+1; it != lines.end(); ++it){
+		for(auto jt=lines.begin(); jt != it; ++jt){
+			RS_VectorSolutions&& sol=RS_Information::getIntersectionLineLine(*it, *jt);
+			if(sol.size()){
+				vertices.push_back(sol.at(0));
+			}
+		}
+	}
+
+//	std::cout<<"vertices.size()="<<vertices.size()<<std::endl;
+
+	switch (vertices.size()){
+	default:
+		return ret;
+	case 4:
+		break;
+	case 5:
+	case 6:
+		for(RS_Line* pl: lines){
+			const double a0=pl->getDirection1();
+			std::vector<std::vector<RS_Vector>::iterator> left;
+			std::vector<std::vector<RS_Vector>::iterator> right;
+			for(auto it=vertices.begin(); it != vertices.end(); ++it){
+				RS_Vector&& dir=*it - pl->getNearestPointOnEntity(*it, false);
+				if(dir.squared()<RS_TOLERANCE15) continue;
+//				std::cout<<"angle="<<remainder(dir.angle() - a0, 2.*M_PI)<<std::endl;
+				if(remainder(dir.angle() - a0, 2.*M_PI) > 0.)
+					left.push_back(it);
+				else
+					right.push_back(it);
+
+				if(left.size()==2 && right.size()==1){
+					vertices.erase(right[0]);
+					break;
+				} else if(left.size()==1 && right.size()==2){
+					vertices.erase(left[0]);
+					break;
+				}
+			}
+			if(vertices.size()==4) break;
+		}
+		break;
+	}
+
+	//order vertices
+	RS_Vector center(0., 0.);
+	for(const RS_Vector& vp: vertices)
+		center += vp;
+	center *= 0.25;
+	std::sort(vertices.begin(), vertices.end(), [&center](const RS_Vector& a,
+			  const RS_Vector&b)->bool{
+		return center.angleTo(a)<center.angleTo(b);
+	}
+	);
+	for(const RS_Vector& vp: vertices){
+		ret.push_back(vp);
+//		std::cout<<"vp="<<vp<<std::endl;
+	}
+	return ret;
+}

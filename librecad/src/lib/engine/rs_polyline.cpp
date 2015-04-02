@@ -34,7 +34,31 @@
 //#include "rs_modification.h"
 #include "rs_information.h"
 
+RS_PolylineData::RS_PolylineData():
+	startpoint(false)
+	,endpoint(false)
+{
+}
 
+RS_PolylineData::RS_PolylineData(const RS_Vector& _startpoint,
+				const RS_Vector& _endpoint,
+				bool _closed):
+	startpoint(_startpoint)
+	,endpoint(_endpoint)
+{
+
+	if (_closed==true) {
+		setFlag(RS2::FlagClosed);
+	}
+}
+
+std::ostream& operator << (std::ostream& os,
+								  const RS_PolylineData& pd) {
+	os << "(" << pd.startpoint <<
+	"/" << pd.endpoint <<
+	")";
+	return os;
+}
 /**
  * Constructor.
  */
@@ -59,12 +83,13 @@ RS_Polyline::RS_Polyline(RS_EntityContainer* parent,
     calculateBorders();
 }
 
-
-/**
- * Destructor
- */
-RS_Polyline::~RS_Polyline() {}
-
+RS_Entity* RS_Polyline::clone() const {
+	RS_Polyline* p = new RS_Polyline(*this);
+	p->setOwner(isOwner());
+	p->initId();
+	p->detach();
+	return p;
+}
 
 /**
  * Removes the last vertex of this polyline.
@@ -234,9 +259,9 @@ RS_Entity* RS_Polyline::createVertex(const RS_Vector& v, double bulge, bool prep
         double h = sqrt(wu);
 
         if (bulge>0.0) {
-            angle+=M_PI/2.0;
+			angle+=M_PI_2;
         } else {
-            angle-=M_PI/2.0;
+			angle-=M_PI_2;
         }
 
         if (fabs(alpha)>M_PI) {
@@ -374,9 +399,7 @@ void RS_Polyline::addEntity(RS_Entity* entity) {
 
 
 RS_VectorSolutions RS_Polyline::getRefPoints() {
-    RS_VectorSolutions ret;
-
-    ret.push_back(data.startpoint);
+	RS_VectorSolutions ret({data.startpoint});
 
     for (RS_Entity* e=firstEntity(RS2::ResolveNone);
          e!=NULL;
@@ -479,12 +502,12 @@ bool RS_Polyline::offset(const RS_Vector& coord, const double& distance){
 //        RS_VectorSolutions sol1;
         double dmax(RS_TOLERANCE15);
         RS_Vector trimP(false);
-        for(int j=0;j<sol0.getNumber();j++){
+		for(const RS_Vector& vp: sol0){
 
-            double d0( (sol0.get(j) - pnew->entityAt(previousIndex)->getStartpoint()).squared());//potential bug, need to trim better
+			double d0( (vp - pnew->entityAt(previousIndex)->getStartpoint()).squared());//potential bug, need to trim better
             if(d0>dmax) {
                 dmax=d0;
-                trimP=sol0.get(j);
+				trimP=vp;
             }
         }
         if(trimP.valid){
@@ -505,11 +528,11 @@ bool RS_Polyline::offset(const RS_Vector& coord, const double& distance){
 //        RS_VectorSolutions sol1;
         double dmax(RS_TOLERANCE15);
         RS_Vector trimP(false);
-        for(int j=0;j<sol0.getNumber();j++){
-            double d0( (sol0.get(j) - pnew->entityAt(previousIndex)->getEndpoint()).squared());//potential bug, need to trim better
+		for(const RS_Vector& vp: sol0){
+			double d0( (vp - pnew->entityAt(previousIndex)->getEndpoint()).squared());//potential bug, need to trim better
             if(d0>dmax) {
                 dmax=d0;
-                trimP=sol0.get(j);
+				trimP=vp;
             }
         }
         if(trimP.valid){
@@ -534,12 +557,12 @@ bool RS_Polyline::offset(const RS_Vector& coord, const double& distance){
 //            double a0(intersections.at(i).angleTo(vp0));
 //            double a1(intersections.at(i).angleTo(vp1));
             RS_VectorSolutions sol1;
-            for(int j=0;j<sol0.getNumber();j++){
-                if(RS_Math::isAngleBetween(intersections.at(i).angleTo(sol0.get(j)),
+			for(const RS_Vector& vp: sol0){
+				if(RS_Math::isAngleBetween(intersections.at(i).angleTo(vp),
                                            pnew->entityAt(i)->getDirection2(),
                                            pnew->entityAt(i+1)->getDirection1(),
                                            false)==false){
-                    sol1.push_back(sol0.get(j));
+					sol1.push_back(vp);
                 }
             }
             if(sol1.getNumber()==0) continue;

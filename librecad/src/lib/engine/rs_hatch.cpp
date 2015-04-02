@@ -31,6 +31,10 @@
 #include <QString>
 #include "rs_hatch.h"
 
+#include "rs_arc.h"
+#include "rs_circle.h"
+#include "rs_ellipse.h"
+#include "rs_line.h"
 #include "rs_graphicview.h"
 #include "rs_dialogfactory.h"
 #include "rs_infoarea.h"
@@ -44,6 +48,23 @@
 #if QT_VERSION < 0x040400
 #include "emu_qt44.h"
 #endif
+
+RS_HatchData::RS_HatchData(bool _solid,
+						   double _scale,
+						   double _angle,
+						   const QString& _pattern):
+	solid(_solid)
+  ,scale(_scale)
+  ,angle(_angle)
+  ,pattern(_pattern)
+{
+	//std::cout << "RS_HatchData: " << pattern.latin1() << "\n";
+}
+
+std::ostream& operator << (std::ostream& os, const RS_HatchData& td) {
+	os << "(" << td.pattern.toLatin1().data() << ")";
+	return os;
+}
 
 /**
  * Constructor.
@@ -84,7 +105,7 @@ bool RS_Hatch::validate() {
 
 
 
-RS_Entity* RS_Hatch::clone() {
+RS_Entity* RS_Hatch::clone() const{
     RS_Hatch* t = new RS_Hatch(*this);
     t->setOwner(isOwner());
     t->initId();
@@ -97,7 +118,7 @@ RS_Entity* RS_Hatch::clone() {
 /**
  * @return Number of loops.
  */
-int RS_Hatch::countLoops() {
+int RS_Hatch::countLoops() const{
     if (data.solid) {
         return count();
     } else {
@@ -105,7 +126,9 @@ int RS_Hatch::countLoops() {
     }
 }
 
-
+bool RS_Hatch::isContainer() const {
+	return !isSolid();
+}
 
 /**
  * Recalculates the borders of this hatch.
@@ -331,18 +354,18 @@ void RS_Hatch::update() {
                     RS_VectorSolutions sol =
                         RS_Information::getIntersection(e, p, true);
 
-                    for (int i=0; i<=1; ++i) {
-                        if (sol.get(i).valid) {
-                            is.append(std::shared_ptr<RS_Vector>(
-                                          new RS_Vector(sol.get(i))
-                                                        ));
-                            RS_DEBUG->print("  pattern line intersection: %f/%f",
-                                            sol.get(i).x, sol.get(i).y);
-                        }
-                    }
-                }
-            }
-        }
+					for (const RS_Vector& vp: sol){
+						if (vp.valid) {
+							is.append(std::shared_ptr<RS_Vector>(
+										  new RS_Vector(vp)
+										  ));
+							RS_DEBUG->print("  pattern line intersection: %f/%f",
+											vp.x, vp.y);
+						}
+					}
+				}
+			}
+		}
 
 
         QList<std::shared_ptr<RS_Vector> > is2;//to be filled with sorted intersections

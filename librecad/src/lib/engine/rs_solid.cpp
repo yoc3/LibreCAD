@@ -27,10 +27,48 @@
 
 #include "rs_solid.h"
 
+#include "rs_line.h"
 #include "rs_graphicview.h"
 #include "rs_painter.h"
 #include "rs_information.h"
 
+RS_SolidData::RS_SolidData():
+	corner{{RS_Vector(false), RS_Vector(false), RS_Vector(false), RS_Vector(false)}}
+{
+}
+
+/**
+ * Constructor for a solid with 3 corners.
+ */
+RS_SolidData::RS_SolidData(const RS_Vector& corner1,
+			 const RS_Vector& corner2,
+			 const RS_Vector& corner3):
+	corner{{corner1, corner2, corner3, RS_Vector(false)}}
+{
+}
+
+/**
+ * Constructor for a solid with 4 corners.
+ */
+RS_SolidData::RS_SolidData(const RS_Vector& corner1,
+			 const RS_Vector& corner2,
+			 const RS_Vector& corner3,
+			 const RS_Vector& corner4):
+	corner{{corner1, corner2, corner3, corner4}}
+{
+}
+
+std::ostream& operator << (std::ostream& os,
+								  const RS_SolidData& pd) {
+	os << "(";
+	for (int i=0; i<4; i++) {
+		os << pd.corner[i];
+	}
+	os << ")";
+	return os;
+}
+
+RS_Vector corner[4];
 
 /**
  * Default constructor.
@@ -41,7 +79,11 @@ RS_Solid::RS_Solid(RS_EntityContainer* parent,
     calculateBorders();
 }
 
-
+RS_Entity* RS_Solid::clone() const {
+	RS_Solid* s = new RS_Solid(*this);
+	s->initId();
+	return s;
+}
 
 /**
  * @return Corner number 'num'.
@@ -380,7 +422,7 @@ void RS_Solid::draw(RS_Painter* painter, RS_GraphicView* view,
         return;
     }
 
-    RS_SolidData d = getData();
+//    RS_SolidData d = getData();
     if (isTriangle()) {
         painter->fillTriangle(view->toGui(getCorner(0)),
                               view->toGui(getCorner(1)),

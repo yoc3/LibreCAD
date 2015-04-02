@@ -31,6 +31,7 @@
 
 #include <QList>
 #include <QVector>
+#include <vector>
 #include "rs_atomicentity.h"
 
 class LC_Quadratic;
@@ -38,42 +39,20 @@ class LC_Quadratic;
 /**
  * Holds the data that defines a circle.
  */
-class RS_CircleData {
-public:
-    RS_CircleData() {}
+struct RS_CircleData {
+	RS_CircleData() = default;
 
-    RS_CircleData(const RS_Vector& center,
-                  double radius) {
+	RS_CircleData(const RS_Vector& m_vCenter,
+				  double radius);
 
-        this->center = center;
-        this->radius = radius;
-    }
+	void reset();
 
-    void reset() {
-        center = RS_Vector(false);
-        radius = 0.0;
-    }
-
-    bool isValid() {
-        return (center.valid && radius>RS_TOLERANCE);
-    }
-
-    friend class RS_Circle;
-
-    friend std::ostream& operator << (std::ostream& os,
-                                      const RS_CircleData& ad) {
-        os << "(" << ad.center <<
-              "/" << ad.radius <<
-              ")";
-        return os;
-    }
-
-public:
-    RS_Vector center;
-    double radius;
+	bool isValid() const;
+	RS_Vector center;
+	double radius;
 };
 
-
+std::ostream& operator << (std::ostream& os, const RS_CircleData& ad);
 
 /**
  * Class for a circle entity.
@@ -82,15 +61,12 @@ public:
  */
 class RS_Circle : public RS_AtomicEntity {
 public:
+	RS_Circle()=default;
     RS_Circle (RS_EntityContainer* parent,
                const RS_CircleData& d);
-    virtual ~RS_Circle() {}
+	~RS_Circle() = default;
 
-    virtual RS_Entity* clone() {
-        RS_Circle* c = new RS_Circle(*this);
-        c->initId();
-        return c;
-    }
+	virtual RS_Entity* clone() const;
 
     /**	@return RS2::EntityCircle */
     virtual RS2::EntityType rtti() const {
@@ -102,7 +78,7 @@ public:
     }
 
     /** @return Copy of data that defines the circle. **/
-    RS_CircleData getData() const {
+	const RS_CircleData& getData() const {
         return data;
     }
 
@@ -131,21 +107,13 @@ public:
     }
 
     /** @return The center point (x) of this arc */
-    virtual RS_Vector getCenter() const {
-        return data.center;
-    }
+	virtual RS_Vector getCenter() const;
     /** Sets new center. */
-    void setCenter(const RS_Vector& c) {
-        data.center = c;
-    }
+	void setCenter(const RS_Vector& c);
     /** @return The radius of this arc */
-    virtual double getRadius() const {
-        return data.radius;
-    }
+	virtual double getRadius() const;
     /** Sets new radius. */
-    void setRadius(double r) {
-        data.radius = r;
-    }
+	void setRadius(double r);
     double getAngleLength() const;
     virtual double getLength() const;
     virtual bool isTangent(const RS_CircleData&  circleData);
@@ -165,8 +133,8 @@ with Cx the center of the common tangent circle, Rx the radius. Ci and Ri are th
 **/
     static QList<RS_Circle> solveAppolloniusSingle(const QList<RS_Circle>& circles);
 
-    QList<RS_Circle> createTan3(const QVector<RS_AtomicEntity*>& circles);
-    bool testTan3(const QVector<RS_AtomicEntity*>& circles);
+	std::vector<RS_Circle> createTan3(const std::vector<RS_AtomicEntity*>& circles);
+	bool testTan3(const std::vector<RS_AtomicEntity*>& circles);
     virtual RS_Vector getMiddlePoint(void)const;
     virtual RS_Vector getNearestEndpoint(const RS_Vector& coord,
                                          double* dist = nullptr) const;

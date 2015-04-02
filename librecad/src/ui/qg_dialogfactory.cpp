@@ -36,6 +36,7 @@
 #include "rs_system.h"
 #include "rs_actioninterface.h"
 #include "rs_document.h"
+#include "rs_hatch.h"
 
 #include "rs_actiondimlinear.h"
 
@@ -565,7 +566,7 @@ QString QG_DialogFactory::requestImageOpenDialog()
     QStringList filters;
     QString all = "";
     bool haveJpeg= false;
-    foreach (QByteArray format, QImageReader::supportedImageFormats()) {
+	for(const QByteArray& format: QImageReader::supportedImageFormats()) {
         if (format.toUpper() == "JPG" || format.toUpper() == "JPEG" ){
             if (!haveJpeg) {
                 haveJpeg = true;

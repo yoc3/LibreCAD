@@ -26,6 +26,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <QVector>
 #include "rs_previewactioninterface.h"
 
+class RS_AtomicEntity;
+struct RS_CircleData;
+
 /**
  * Draw a circle tangential to two give circles and with radius
  *
@@ -46,7 +49,7 @@ public:
 public:
     RS_ActionDrawCircleTan2(RS_EntityContainer& container,
                                  RS_GraphicView& graphicView);
-	~RS_ActionDrawCircleTan2() = default;
+	~RS_ActionDrawCircleTan2();
 
     static QAction* createGUIAction(RS2::ActionType type, QObject* /*parent*/);
 
@@ -73,22 +76,19 @@ public:
     virtual void showOptions();
     virtual void hideOptions();
     void setRadius(const double& r);
-    double getRadius(){
-        return cData.radius;
-    }
+	double getRadius() const;
 
 
 protected:
     RS_Entity* catchCircle(QMouseEvent* e);
     QVector<RS_AtomicEntity*> circles;
     private:
-    RS_CircleData cData;
+	std::unique_ptr<RS_CircleData> cData;
     RS_Vector coord;
     double radius;
     bool valid;
-    QVector<RS2::EntityType> enTypeList;
-    //keep a list of centers found
-    RS_VectorSolutions centers;
+	const QVector<RS2::EntityType> enTypeList={RS2::EntityLine, RS2::EntityArc, RS2::EntityCircle};
+	RS_VectorSolutions centers;
 
 };
 

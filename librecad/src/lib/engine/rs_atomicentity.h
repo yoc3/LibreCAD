@@ -30,7 +30,7 @@
 
 #include "rs_entity.h"
 
-class RS_CircleData;
+struct RS_CircleData;
 
 /**
  * Class representing an atomic entity
@@ -48,7 +48,7 @@ public:
     /**
      * Destrutor.
      */
-    virtual ~RS_AtomicEntity() {}
+	virtual ~RS_AtomicEntity() = default;
 
     /**
      * @return false because entities made from subclasses are

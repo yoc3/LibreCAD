@@ -28,10 +28,11 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QAction>
-#include <limits.h>
+#include <climits>
 #include "qc_applicationwindow.h"
 #include "rs_graphicview.h"
 
+#include "rs_line.h"
 #include "rs_linetypepattern.h"
 #include "rs_eventhandler.h"
 #include "rs_graphic.h"
@@ -1349,9 +1350,9 @@ void RS_GraphicView::drawEntity(RS_Painter *painter, RS_Entity* e, double& patte
     // draw reference points:
     if (e->isSelected()) {
         if (!e->isParentSelected()) {
-            RS_VectorSolutions s = e->getRefPoints();
+			RS_VectorSolutions&& s = e->getRefPoints();
 
-            for (int i=0; i<s.getNumber(); ++i) {
+			for (size_t i=0; i<s.getNumber(); ++i) {
                 int sz = -1;
 				RS_Color col = handleColor;
 				if (i == 0) {
